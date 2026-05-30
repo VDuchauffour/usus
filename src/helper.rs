@@ -1,4 +1,4 @@
-use anyhow::{anyhow, bail, Result};
+use anyhow::{Result, anyhow, bail};
 use std::io::{self, BufRead, Write};
 
 const RED: &str = "\x1b[0;31m";

@@ -8,7 +8,7 @@ use std::collections::{HashMap, HashSet};
 use crate::http::fetch_month;
 use crate::parser::extract_data;
 use crate::providers::opencode::load_config;
-use crate::render::{render, COST_DIVISOR};
+use crate::render::{COST_DIVISOR, render};
 use crate::style::{DIM, RESET};
 
 const MONTH_NAMES: [&str; 12] = [

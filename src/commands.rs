@@ -1,10 +1,10 @@
 // Commands: login, set-sub-day
 
-use anyhow::{anyhow, Result};
+use anyhow::{Result, anyhow};
 use std::fs;
 
 use crate::helper::{die, prompt_sub_day, read_line, read_with_default};
-use crate::providers::opencode::{config_dir, config_path, load_config, save_config, Config};
+use crate::providers::opencode::{Config, config_dir, config_path, load_config, save_config};
 use crate::style::{BOLD, DIM, GREEN, RESET};
 
 pub fn cmd_login() -> Result<()> {

@@ -4,7 +4,7 @@
 // TanStack-Start serialized JS snippet (`;0x<hex>;<expr>`) that needs JS
 // evaluation. `parse_js_response` handles the latter via an embedded JS engine.
 
-use anyhow::{anyhow, Context as _, Result};
+use anyhow::{Context as _, Result, anyhow};
 use boa_engine::{Context as JsContext, Source};
 use serde_json::Value;
 

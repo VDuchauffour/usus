@@ -5,11 +5,11 @@
 
 use anyhow::Result;
 use ratatui::{
+    Terminal, TerminalOptions, Viewport,
     backend::CrosstermBackend,
     style::{Color, Modifier, Style},
     text::{Line, Span},
     widgets::Paragraph,
-    Terminal, TerminalOptions, Viewport,
 };
 use std::io::{self, Write};
 
