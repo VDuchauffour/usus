@@ -7,7 +7,7 @@ use std::collections::{HashMap, HashSet};
 
 use crate::http::fetch_month;
 use crate::parser::extract_data;
-use crate::providers::opencode::load_config;
+use crate::providers::opencode_go::load_config;
 use crate::render::{COST_DIVISOR, render};
 use crate::style::{DIM, RESET};
 

@@ -4,7 +4,7 @@ use anyhow::{Result, anyhow};
 use std::fs;
 
 use crate::helper::{die, prompt_sub_day, read_line, read_with_default};
-use crate::providers::opencode::{Config, config_dir, config_path, load_config, save_config};
+use crate::providers::opencode_go::{Config, config_dir, config_path, load_config, save_config};
 use crate::style::{BOLD, DIM, GREEN, RESET};
 
 pub fn cmd_login() -> Result<()> {

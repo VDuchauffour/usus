@@ -3,7 +3,7 @@
 use anyhow::{Context as _, Result};
 use serde_json::json;
 
-use crate::providers::opencode::Config;
+use crate::providers::opencode_go::Config;
 use crate::style::{RED, RESET};
 
 const API_URL: &str = "https://opencode.ai/_server";

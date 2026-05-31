@@ -1,1 +1,1 @@
-pub mod opencode;
+pub mod opencode_go;
