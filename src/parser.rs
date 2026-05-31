@@ -64,10 +64,10 @@ fn parse_js_response(text: &str) -> Result<Value> {
 }
 
 fn unwrap_value(v: Value) -> Value {
-    if let Value::Array(arr) = &v {
-        if arr.len() == 1 {
-            return arr[0].clone();
-        }
+    if let Value::Array(arr) = &v
+        && arr.len() == 1
+    {
+        return arr[0].clone();
     }
     if let Value::Object(map) = &v {
         if let Some(inner) = map.get("value") {

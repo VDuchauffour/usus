@@ -51,7 +51,7 @@ fn truncate_or_pad(name: &str, width: usize) -> String {
     } else {
         let mut out = String::with_capacity(name.len() + (width - count));
         out.push_str(name);
-        out.extend(std::iter::repeat(' ').take(width - count));
+        out.extend(std::iter::repeat_n(' ', width - count));
         out
     }
 }
@@ -63,7 +63,7 @@ fn pad_left(s: &str, width: usize) -> String {
         s.to_string()
     } else {
         let mut out = String::with_capacity(s.len() + (width - count));
-        out.extend(std::iter::repeat(' ').take(width - count));
+        out.extend(std::iter::repeat_n(' ', width - count));
         out.push_str(s);
         out
     }
@@ -117,7 +117,7 @@ pub fn render(results: &[(String, f64)], total_cost: f64, billing_end: &str) -> 
                     .fg(Color::Cyan)
                     .add_modifier(Modifier::BOLD),
             ),
-            Span::raw(format!("{h_pad}")),
+            Span::raw(h_pad.to_string()),
             Span::styled(renew_str, Style::default().dim()),
         ]),
         // hr
@@ -134,7 +134,7 @@ pub fn render(results: &[(String, f64)], total_cost: f64, billing_end: &str) -> 
         ]),
         // used + remaining
         Line::from(vec![
-            Span::raw(format!("  ")),
+            Span::raw("  ".to_string()),
             Span::styled(used_str, Style::default().add_modifier(Modifier::BOLD)),
             Span::raw(c_pad),
             Span::styled(rem_str, Style::default().fg(Color::Green)),

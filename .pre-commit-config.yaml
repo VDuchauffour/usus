@@ -59,6 +59,7 @@ repos:
       - id: cargo-check
       - id: clippy
         args:
+          - --fix
           - --all-targets
           - --all-features
           - --
