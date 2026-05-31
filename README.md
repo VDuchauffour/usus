@@ -28,7 +28,7 @@ Run `usus login` and follow the prompts. You'll need to grab your `auth` cookie 
 
 1. Log in to your OpenCode account.
 2. Open DevTools → Application → Cookies → `https://opencode.ai`.
-3. Copy the `auth` cookie value (starts with `Fe26.2**`).
+3. Copy the `auth` cookie value
 
 Config is stored at `~/.config/usus/config.json`.
 
