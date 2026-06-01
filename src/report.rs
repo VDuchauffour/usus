@@ -68,7 +68,7 @@ struct KeyInfo {
 fn start_spin() -> ProgressBar {
     let spinner = ProgressBar::new_spinner();
     spinner.set_style(
-        ProgressStyle::with_template("{spinner:.dim} {msg:.dim}")
+        ProgressStyle::with_template("{spinner} {msg}")
             .unwrap()
             .tick_chars("⠋⠙⠹⠸⠼⠴⠦⠧⠇⠏ "),
     );
