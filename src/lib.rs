@@ -1,16 +1,16 @@
 use anyhow::Result;
 
 pub mod cli;
-pub mod commands;
 pub mod helper;
 pub mod http;
+pub mod login;
 pub mod parser;
 pub mod providers;
 pub mod render;
 pub mod report;
 pub mod style;
 
-use commands::cmd_login;
+use login::cmd_login;
 use report::cmd_report;
 
 pub fn run(cli: cli::Cli) -> Result<()> {
