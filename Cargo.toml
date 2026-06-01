@@ -2,6 +2,8 @@
 name = "usus"
 version = "0.0.1"
 edition = "2024"
+description = "Your best partner for AI harnesses"
+license = "MIT"
 
 [dependencies]
 anyhow = "1"
