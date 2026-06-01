@@ -23,5 +23,7 @@ jobs:
         uses: Swatinem/rust-cache@v2
       - name: Build project
         run: cargo build --release --verbose
+      - name: Log in to crates.io
+        run: cargo login ${{ secrets.CARGO_REGISTRY_TOKEN }}
       - name: Publish to crates.io
-        run: cargo publish --token ${{ secrets.CARGO_REGISTRY_TOKEN }}
+        run: cargo publish
