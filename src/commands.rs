@@ -4,7 +4,7 @@ use anyhow::{Result, anyhow};
 use std::fs;
 
 use crate::helper::{die, prompt_sub_day, read_line, read_with_default};
-use crate::providers::opencode_go::{Config, config_dir, config_path, load_config, save_config};
+use crate::providers::opencode_go::{Config, config_dir, config_path, save_config};
 use crate::style::{BOLD, DIM, GREEN, RESET};
 
 pub fn cmd_login(
@@ -74,18 +74,5 @@ pub fn cmd_login(
         "{GREEN}Configuration saved to {}{RESET}",
         config_path()?.display()
     );
-    Ok(())
-}
-
-pub fn cmd_set_sub_day() -> Result<()> {
-    let mut cfg = load_config()?;
-    println!("Current billing cycle day: {BOLD}{}{RESET}", cfg.sub_day);
-    println!();
-    println!("What day of the month does your billing cycle start?");
-    println!("{DIM}(e.g., if you subscribed on 20-Apr, enter 20){RESET}");
-    let sub_day = prompt_sub_day()?;
-    cfg.sub_day = sub_day;
-    save_config(&cfg)?;
-    println!("{GREEN}Billing cycle day updated to {sub_day}{RESET}");
     Ok(())
 }

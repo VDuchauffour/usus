@@ -23,8 +23,6 @@ pub enum Command {
         #[arg(long, value_parser = clap::value_parser!(u32).range(1..=31))]
         sub_day: Option<u32>,
     },
-
-    SetSubDay,
     /// Fetch and display current usage
     Report,
 }
