@@ -9,7 +9,22 @@ pub struct Cli {
 
 #[derive(Subcommand)]
 pub enum Command {
-    Login,
+    /// Save your auth cookie and workspace config
+    Login {
+        #[arg(long, short)]
+        workspace_id: Option<String>,
+
+        #[arg(long, short)]
+        server_id: Option<String>,
+
+        #[arg(long, short)]
+        function_id: Option<i64>,
+
+        #[arg(long, value_parser = clap::value_parser!(u32).range(1..=31))]
+        sub_day: Option<u32>,
+    },
+
     SetSubDay,
+    /// Fetch and display current usage
     Report,
 }
