@@ -1,0 +1,12 @@
+{
+  "rust-analyzer.checkOnSave": true,
+  "files.exclude": {
+    "**/.git": true,
+    "**/.coverage": true,
+    "**/htmlcov": true,
+    "target": true,
+    "build": true,
+    "coverage.xml": true,
+    "node_modules": true
+  }
+}
