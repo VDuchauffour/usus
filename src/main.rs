@@ -1,10 +1,11 @@
-use std::env;
-use std::process;
+use clap::Parser;
+pub mod style;
+use style::{RED, RESET};
 
 fn main() {
-    let args: Vec<String> = env::args().collect();
-    if let Err(e) = usus::run(&args) {
-        eprintln!("\x1b[0;31mError:\x1b[0m {e:#}");
-        process::exit(1);
+    let cli = usus::cli::Cli::parse();
+    if let Err(e) = usus::run(cli) {
+        eprintln!("{RED}Error:{RESET} {e:#}");
+        std::process::exit(1);
     }
 }
