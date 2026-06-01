@@ -96,6 +96,11 @@ pub fn cmd_report() -> Result<()> {
 
     let mut responses = Vec::with_capacity(period.months_to_fetch.len());
     for (year, month) in &period.months_to_fetch {
+        // spinner.set_message(format!(
+        //     "Fetching {} {}...",
+        //     MONTH_NAMES[(*month - 1) as usize],
+        //     year
+        // ));
         let js_month = month - 1;
         responses.push(fetch_month(&client, &cfg, *year, js_month)?);
     }
