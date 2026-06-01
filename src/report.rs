@@ -65,7 +65,7 @@ struct KeyInfo {
     deleted: bool,
 }
 
-fn start_spin() -> ProgressBar {
+fn get_braille_spinner() -> ProgressBar {
     let spinner = ProgressBar::new_spinner();
     spinner.set_style(
         ProgressStyle::with_template("{spinner} {msg}")
@@ -88,7 +88,7 @@ pub fn cmd_report() -> Result<()> {
         cfg.sub_day as i32,
     );
 
-    let spinner = start_spin();
+    let spinner = get_braille_spinner();
 
     let client = reqwest::blocking::Client::builder()
         .build()
