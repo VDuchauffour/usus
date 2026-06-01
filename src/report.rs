@@ -1,5 +1,3 @@
-// Report command
-
 use anyhow::{Context as _, Result};
 use chrono::{Datelike, Local};
 use serde_json::Value;
@@ -9,7 +7,8 @@ use crate::http::fetch_month;
 use crate::parser::extract_data;
 use crate::providers::opencode_go::load_config;
 use crate::render::{COST_DIVISOR, render};
-use crate::style::{DIM, RESET};
+use indicatif::{ProgressBar, ProgressStyle};
+use std::time::Duration;
 
 const MONTH_NAMES: [&str; 12] = [
     "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec",
@@ -66,6 +65,18 @@ struct KeyInfo {
     deleted: bool,
 }
 
+fn get_spinner() -> ProgressBar {
+    let spinner = ProgressBar::new_spinner();
+    spinner.set_style(
+        ProgressStyle::with_template("{spinner} {msg}")
+            .unwrap()
+            .tick_chars("⠋⠙⠹⠸⠼⠴⠦⠧⠇⠏ "),
+    );
+    spinner.set_message("Fetching usage data...");
+    spinner.enable_steady_tick(Duration::from_millis(80));
+    spinner
+}
+
 pub fn cmd_report() -> Result<()> {
     let cfg = load_config()?;
 
@@ -77,7 +88,7 @@ pub fn cmd_report() -> Result<()> {
         cfg.sub_day as i32,
     );
 
-    println!("{DIM}Fetching usage data...{RESET}");
+    let spinner = get_spinner();
 
     let client = reqwest::blocking::Client::builder()
         .build()
@@ -85,6 +96,11 @@ pub fn cmd_report() -> Result<()> {
 
     let mut responses = Vec::with_capacity(period.months_to_fetch.len());
     for (year, month) in &period.months_to_fetch {
+        // spinner.set_message(format!(
+        //     "Fetching {} {}...",
+        //     MONTH_NAMES[(*month - 1) as usize],
+        //     year
+        // ));
         let js_month = month - 1;
         responses.push(fetch_month(&client, &cfg, *year, js_month)?);
     }
@@ -180,6 +196,8 @@ pub fn cmd_report() -> Result<()> {
         results.push((info.name.clone(), dollars));
     }
     results.sort_by(|a, b| b.1.partial_cmp(&a.1).unwrap_or(std::cmp::Ordering::Equal));
+
+    spinner.finish_and_clear();
 
     render(&results, total_cost, &period.end)?;
     Ok(())
