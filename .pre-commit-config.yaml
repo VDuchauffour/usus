@@ -41,16 +41,15 @@ repos:
           - mdformat-tables
           - mdformat-frontmatter
           - mdformat-shfmt
-  - repo: https://github.com/doublify/pre-commit-rust
-    rev: v1.0
+  - repo: local
     hooks:
-      - id: fmt
-      - id: cargo-check
-      - id: clippy
-        args:
-          - --fix
-          - --all-targets
-          - --all-features
-          - --
-          - -D
-          - warnings
+      - id: just-check
+        name: just check
+        entry: just check
+        language: system
+        pass_filenames: false
+      - id: just-ci
+        name: just ci
+        entry: just ci
+        language: system
+        pass_filenames: false
