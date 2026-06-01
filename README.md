@@ -5,32 +5,22 @@ A small Rust CLI to track your [OpenCode](https://opencode.ai) Go subscription u
 ## Install
 
 ```sh
-cargo install --path .
-```
-
-Or run from source:
-
-```sh
-cargo run --release -- <command>
+cargo install usus
 ```
 
 ## Usage
 
-```sh
-usus login         # save auth cookie + workspace config
-usus set-sub-day   # update billing cycle start day
-usus report        # fetch and display current usage
+```shell
+Usage: usus <COMMAND>
+
+Commands:
+  login   Save your auth cookie and workspace config
+  report  Fetch and display current usage
 ```
 
-### First-time setup
+Run `usus login` once to paste your `auth` cookie (DevTools → Application → Cookies → `https://opencode.ai`) and set your billing-cycle start day. Re-run any time to update.
 
-Run `usus login` and follow the prompts. You'll need to grab your `auth` cookie from the browser:
-
-1. Log in to your OpenCode account.
-2. Open DevTools → Application → Cookies → `https://opencode.ai`.
-3. Copy the `auth` cookie value
-
-Config is stored at `~/.config/usus/config.json`.
+Config lives at `~/.config/usus/config.json`.
 
 ## Acknowledgments
 
