@@ -25,9 +25,7 @@ jobs:
           components: rustfmt, clippy
       - name: Cache cargo registry and build
         uses: Swatinem/rust-cache@v2
-      - name: Formatter
-        run: cargo fmt --check
-      - name: Lint
-        run: cargo clippy --all-targets --all-features --locked -- -D warnings
-      - name: Test
-        run: cargo test --locked --verbose
+      - name: Install just
+        run: cargo install just
+      - name: Run CI
+        run: just ci

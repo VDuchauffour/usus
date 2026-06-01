@@ -1,0 +1,43 @@
+_default:
+    @just --list
+
+build:
+    cargo build
+
+release:
+    cargo build --release
+
+run *args:
+    cargo run -- {{args}}
+
+run-release *args:
+    cargo run --release -- {{args}}
+
+test:
+    cargo test --locked
+
+lint:
+    cargo clippy --all-targets --all-features
+
+lint-strict:
+    cargo clippy --all-targets --all-features --locked -- -D warnings
+
+fmt:
+    cargo fmt
+
+fmt-check:
+    cargo fmt --check
+
+check:
+    cargo check
+
+ci: fmt-check lint-strict test
+
+install:
+    cargo install --path .
+
+clean:
+    cargo clean
+
+update:
+    cargo update
