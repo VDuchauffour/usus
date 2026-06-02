@@ -16,15 +16,18 @@ const ALLOWANCE: f64 = 60.0;
 const COST_DIVISOR: f64 = 100_000_000.0;
 
 #[derive(Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
 pub struct Config {
-    #[serde(rename = "authCookie")]
     pub auth_cookie: String,
-    #[serde(rename = "workspaceId")]
     pub workspace_id: String,
-    #[serde(rename = "serverId")]
     pub server_id: String,
-    #[serde(rename = "functionId")]
     pub function_id: i64,
+}
+
+pub fn validate(blob: &Value) -> Result<()> {
+    let _: Config =
+        serde_json::from_value(blob.clone()).context("opencode-go provider config")?;
+    Ok(())
 }
 
 pub struct OpenCodeGo;
