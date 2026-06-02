@@ -23,7 +23,7 @@ lint-strict:
     cargo clippy --all-targets --all-features --locked -- -D warnings
 
 lint-strict-fix:
-    cargo clippy --fix --all-targets --all-features --locked -- -D warnings
+    cargo clippy --fix --allow-dirty --all-targets --all-features --locked -- -D warnings
 
 fmt:
     cargo fmt
