@@ -41,6 +41,9 @@ jobs:
         uses: dtolnay/rust-toolchain@stable
       - name: Cache cargo registry and build
         uses: Swatinem/rust-cache@v2
+        with:
+          key: tarpaulin
+          cache-all-crates: true
       - name: Install cargo-tarpaulin
         uses: taiki-e/install-action@cargo-tarpaulin
       - name: Generate coverage
