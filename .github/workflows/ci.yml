@@ -27,14 +27,23 @@ jobs:
         uses: Swatinem/rust-cache@v2
       - name: Install just
         uses: taiki-e/install-action@just
-      - name: Install cargo-tarpaulin
-        uses: taiki-e/install-action@cargo-tarpaulin
       - name: Run CI
         run: |
           just fmt-check
           just lint-strict
+
+  coverage:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+      - name: Cache cargo registry and build
+        uses: Swatinem/rust-cache@v2
+      - name: Install cargo-tarpaulin
+        uses: taiki-e/install-action@cargo-tarpaulin
       - name: Generate coverage
-        if: ${{ !cancelled() }}
         run: cargo tarpaulin --all-features --workspace --locked --skip-clean --out
           Lcov --output-dir .
       - name: Upload coverage to Codecov
