@@ -1,23 +1,32 @@
 use anyhow::Result;
 use clap::Parser;
 
+use usus::cli::{Cli, Command, LoginProvider};
+use usus::providers::{anthropic, opencode_go};
+use usus::report;
 use usus::style::{RED, RESET};
-use usus::{cli, login, report};
 
-pub fn run(cli: cli::Cli) -> Result<()> {
+pub fn run(cli: Cli) -> Result<()> {
     match cli.command {
-        cli::Command::Login {
-            workspace_id,
-            server_id,
-            function_id,
-            sub_day,
-        } => login::cmd_login(workspace_id, server_id, function_id, sub_day),
-
-        cli::Command::Report => report::cmd_report(),
+        Command::Login { provider } => match provider {
+            LoginProvider::OpencodeGo {
+                workspace_id,
+                server_id,
+                function_id,
+                sub_day,
+            } => opencode_go::login::cmd_login(workspace_id, server_id, function_id, sub_day),
+            LoginProvider::Anthropic {
+                admin_key,
+                allowance,
+                sub_day,
+            } => anthropic::login::cmd_login(admin_key, allowance, sub_day),
+        },
+        Command::Report { provider } => report::cmd_report(provider.as_deref()),
     }
 }
+
 fn main() {
-    let cli = cli::Cli::parse();
+    let cli = Cli::parse();
     if let Err(e) = run(cli) {
         eprintln!("{RED}Error:{RESET} {e:#}");
         std::process::exit(1);

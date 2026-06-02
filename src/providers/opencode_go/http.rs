@@ -1,10 +1,9 @@
 // HTTP
 
-use anyhow::{Context as _, Result};
+use anyhow::{Context as _, Result, bail};
 use serde_json::json;
 
 use crate::providers::opencode_go::Config;
-use crate::style::{RED, RESET};
 
 const API_URL: &str = "https://opencode.ai/_server";
 
@@ -51,9 +50,7 @@ pub fn fetch_month(
     let status = resp.status();
     let text = resp.text().context("Reading response body")?;
     if !status.is_success() {
-        eprintln!("{RED}Failed to fetch data. HTTP {}{RESET}", status.as_u16());
-        eprintln!("{text}");
-        std::process::exit(1);
+        bail!("Failed to fetch data. HTTP {} - {text}", status.as_u16());
     }
     Ok(text)
 }

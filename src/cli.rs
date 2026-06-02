@@ -9,8 +9,24 @@ pub struct Cli {
 
 #[derive(Subcommand)]
 pub enum Command {
-    /// Save your auth cookie and workspace config
+    /// Configure a provider (OpenCode GO, Anthropic, ...)
     Login {
+        #[command(subcommand)]
+        provider: LoginProvider,
+    },
+    /// Fetch and display current usage
+    Report {
+        /// Provider id to query; defaults to the configured default
+        #[arg(long, short)]
+        provider: Option<String>,
+    },
+}
+
+#[derive(Subcommand)]
+pub enum LoginProvider {
+    /// Configure the OpenCode GO provider
+    #[command(name = "opencode-go")]
+    OpencodeGo {
         #[arg(long, short)]
         workspace_id: Option<String>,
 
@@ -23,6 +39,15 @@ pub enum Command {
         #[arg(long, value_parser = clap::value_parser!(u32).range(1..=31))]
         sub_day: Option<u32>,
     },
-    /// Fetch and display current usage
-    Report,
+    /// Configure the Anthropic Admin API provider
+    Anthropic {
+        #[arg(long)]
+        admin_key: Option<String>,
+
+        #[arg(long)]
+        allowance: Option<f64>,
+
+        #[arg(long, value_parser = clap::value_parser!(u32).range(1..=31))]
+        sub_day: Option<u32>,
+    },
 }

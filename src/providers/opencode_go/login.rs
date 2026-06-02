@@ -1,10 +1,8 @@
-// Commands: login, set-sub-day
+use anyhow::{Result, anyhow, bail};
 
-use anyhow::{Result, anyhow};
-use std::fs;
-
-use crate::helper::{die, prompt_sub_day, read_line, read_with_default};
-use crate::providers::opencode_go::{Config, config_dir, config_path, save_config};
+use crate::config::{config_path, load_or_default, save};
+use crate::helper::{prompt_sub_day, read_line, read_with_default};
+use crate::providers::opencode_go::{Config, ID};
 use crate::style::{BOLD, DIM, GREEN, RESET};
 
 pub fn cmd_login(
@@ -13,20 +11,16 @@ pub fn cmd_login(
     function_id: Option<i64>,
     sub_day: Option<u32>,
 ) -> Result<()> {
-    // TODO read authCookie from stdin
-    fs::create_dir_all(config_dir()?)?;
-
-    println!("{BOLD}Login Setup{RESET}");
+    println!("{BOLD}OpenCode GO setup{RESET}");
     println!();
     println!("Steps to get your auth cookie:");
     println!("  1. Log in to your OpenCode account in the browser");
     println!("  2. Open DevTools (F12) -> Application -> Cookies -> https://opencode.ai");
-    println!("  3. Find the cookie named 'auth'");
-    println!("  4. Copy its full value (starts with 'Fe26.2**')");
+    println!("  3. Copy the 'auth' cookie value (starts with 'Fe26.2**')");
     println!();
     let auth_cookie = read_line("Paste your auth cookie: ")?;
     if auth_cookie.is_empty() {
-        die("Auth cookie cannot be empty.");
+        bail!("Auth cookie cannot be empty.");
     }
     println!("{GREEN}Auth cookie saved.{RESET}");
     println!();
@@ -54,24 +48,36 @@ pub fn cmd_login(
         }
     };
 
-    println!();
-    println!("What day of the month does your billing cycle start?");
-    println!("{DIM}(e.g., if you subscribed on 20-Apr, enter 20){RESET}");
-    let sub_day = match sub_day {
-        Some(v) => v,
-        None => prompt_sub_day()?,
-    };
-
     let cfg = Config {
         auth_cookie,
         workspace_id,
         server_id,
         function_id,
-        sub_day,
     };
-    save_config(&cfg)?;
+    let provider_blob = serde_json::to_value(&cfg)?;
+
+    let mut top = load_or_default()?;
+    top.providers.insert(ID.to_string(), provider_blob);
+    if top.default.is_empty() {
+        top.default = ID.to_string();
+    }
+    if top.sub_day == 0 {
+        top.sub_day = match sub_day {
+            Some(v) => v,
+            None => {
+                println!();
+                println!("What day of the month does your billing cycle start?");
+                println!("{DIM}(e.g., if you subscribed on 20-Apr, enter 20){RESET}");
+                prompt_sub_day()?
+            }
+        };
+    } else if let Some(v) = sub_day {
+        top.sub_day = v;
+    }
+
+    save(&top)?;
     println!(
-        "{GREEN}Configuration saved to {}{RESET}",
+        "{GREEN}Provider '{ID}' saved to {}{RESET}",
         config_path()?.display()
     );
     Ok(())
