@@ -1,5 +1,3 @@
-// Top-level namespaced config with transparent migration from the legacy flat shape.
-
 use anyhow::{Context, Result, bail};
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
@@ -35,7 +33,7 @@ pub fn load() -> Result<Config> {
     }
     let raw = fs::read_to_string(&path)
         .with_context(|| format!("Reading config at {}", path.display()))?;
-    parse_with_migration(&raw)
+    serde_json::from_str(&raw).context("Parsing config JSON")
 }
 
 pub fn load_or_default() -> Result<Config> {
@@ -45,28 +43,7 @@ pub fn load_or_default() -> Result<Config> {
     }
     let raw = fs::read_to_string(&path)
         .with_context(|| format!("Reading config at {}", path.display()))?;
-    parse_with_migration(&raw)
-}
-
-fn parse_with_migration(raw: &str) -> Result<Config> {
-    let v: Value = serde_json::from_str(raw).context("Parsing config JSON")?;
-
-    if v.get("providers").is_some() {
-        return serde_json::from_value(v).context("Parsing namespaced config");
-    }
-
-    let sub_day = v.get("subDay").and_then(Value::as_u64).unwrap_or(1) as u32;
-    let mut legacy = v;
-    if let Value::Object(map) = &mut legacy {
-        map.remove("subDay");
-    }
-    let mut providers = BTreeMap::new();
-    providers.insert("opencode-go".to_string(), legacy);
-    Ok(Config {
-        default: "opencode-go".to_string(),
-        sub_day,
-        providers,
-    })
+    serde_json::from_str(&raw).context("Parsing config JSON")
 }
 
 pub fn save(cfg: &Config) -> Result<()> {
@@ -107,31 +84,7 @@ mod tests {
     use super::*;
 
     #[test]
-    fn migrates_legacy_flat_config() {
-        let raw = r#"{
-            "authCookie": "Fe26.2**abc",
-            "workspaceId": "wrk_X",
-            "serverId": "srv_Y",
-            "functionId": 31,
-            "subDay": 20
-        }"#;
-        let cfg = parse_with_migration(raw).unwrap();
-        assert_eq!(cfg.default, "opencode-go");
-        assert_eq!(cfg.sub_day, 20);
-        let oc = cfg.providers.get("opencode-go").unwrap();
-        assert_eq!(
-            oc.get("authCookie").and_then(Value::as_str),
-            Some("Fe26.2**abc")
-        );
-        assert_eq!(oc.get("functionId").and_then(Value::as_i64), Some(31));
-        assert!(
-            oc.get("subDay").is_none(),
-            "subDay should be lifted, not duplicated"
-        );
-    }
-
-    #[test]
-    fn reads_new_namespaced_config_unchanged() {
+    fn reads_namespaced_config() {
         let raw = r#"{
             "default": "anthropic",
             "sub_day": 5,
@@ -140,7 +93,7 @@ mod tests {
                 "opencode-go": { "authCookie": "x", "workspaceId": "w", "serverId": "s", "functionId": 31 }
             }
         }"#;
-        let cfg = parse_with_migration(raw).unwrap();
+        let cfg: Config = serde_json::from_str(raw).unwrap();
         assert_eq!(cfg.default, "anthropic");
         assert_eq!(cfg.sub_day, 5);
         assert_eq!(cfg.providers.len(), 2);
