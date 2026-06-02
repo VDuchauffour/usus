@@ -19,6 +19,7 @@ pub(crate) const DEFAULT_ALLOWANCE: f64 = 200.0;
 const BUCKETS_PER_PAGE: u32 = 31;
 
 #[derive(Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
 pub struct Config {
     pub admin_key: String,
     #[serde(default = "default_allowance")]
@@ -27,6 +28,11 @@ pub struct Config {
 
 fn default_allowance() -> f64 {
     DEFAULT_ALLOWANCE
+}
+
+pub fn validate(blob: &Value) -> Result<()> {
+    let _: Config = serde_json::from_value(blob.clone()).context("anthropic provider config")?;
+    Ok(())
 }
 
 pub struct Anthropic;

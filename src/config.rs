@@ -5,7 +5,10 @@ use std::collections::BTreeMap;
 use std::path::PathBuf;
 use std::{env, fs};
 
-#[derive(Serialize, Deserialize, Default)]
+use crate::providers;
+
+#[derive(Serialize, Deserialize, Default, Debug)]
+#[serde(deny_unknown_fields)]
 pub struct Config {
     #[serde(default)]
     pub default: String,
@@ -15,6 +18,30 @@ pub struct Config {
     pub providers: BTreeMap<String, Value>,
 }
 
+impl Config {
+    pub fn validate(&self) -> Result<()> {
+        if !(1..=31).contains(&self.sub_day) {
+            bail!("sub_day must be between 1 and 31 (got {})", self.sub_day);
+        }
+        if !self.default.is_empty() && !self.providers.contains_key(&self.default) {
+            bail!(
+                "default = '{}' but no such entry in providers map (have: {})",
+                self.default,
+                self.providers
+                    .keys()
+                    .cloned()
+                    .collect::<Vec<_>>()
+                    .join(", ")
+            );
+        }
+        for (id, blob) in &self.providers {
+            providers::validate_provider_blob(id, blob)
+                .with_context(|| format!("Invalid config for provider '{id}'"))?;
+        }
+        Ok(())
+    }
+}
+
 pub fn config_dir() -> Result<PathBuf> {
     let home =
         dirs::home_dir().ok_or_else(|| anyhow::anyhow!("Could not determine home directory"))?;
@@ -22,7 +49,7 @@ pub fn config_dir() -> Result<PathBuf> {
 }
 
 pub fn config_path() -> Result<PathBuf> {
-    Ok(config_dir()?.join("config.json"))
+    Ok(config_dir()?.join("config.toml"))
 }
 
 pub fn load() -> Result<Config> {
@@ -33,7 +60,9 @@ pub fn load() -> Result<Config> {
     }
     let raw = fs::read_to_string(&path)
         .with_context(|| format!("Reading config at {}", path.display()))?;
-    serde_json::from_str(&raw).context("Parsing config JSON")
+    let cfg: Config = toml::from_str(&raw).context("Parsing config TOML")?;
+    cfg.validate()?;
+    Ok(cfg)
 }
 
 pub fn load_or_default() -> Result<Config> {
@@ -43,14 +72,15 @@ pub fn load_or_default() -> Result<Config> {
     }
     let raw = fs::read_to_string(&path)
         .with_context(|| format!("Reading config at {}", path.display()))?;
-    serde_json::from_str(&raw).context("Parsing config JSON")
+    toml::from_str(&raw).context("Parsing config TOML")
 }
 
 pub fn save(cfg: &Config) -> Result<()> {
+    cfg.validate().context("Refusing to save invalid config")?;
     fs::create_dir_all(config_dir()?)?;
     let path = config_path()?;
-    let json = serde_json::to_string_pretty(cfg)?;
-    fs::write(&path, json).with_context(|| format!("Writing config to {}", path.display()))?;
+    let text = toml::to_string_pretty(cfg).context("Serializing config to TOML")?;
+    fs::write(&path, text).with_context(|| format!("Writing config to {}", path.display()))?;
     Ok(())
 }
 
@@ -84,19 +114,103 @@ mod tests {
     use super::*;
 
     #[test]
-    fn reads_namespaced_config() {
-        let raw = r#"{
-            "default": "anthropic",
-            "sub_day": 5,
-            "providers": {
-                "anthropic": { "admin_key": "sk-ant-admin-x" },
-                "opencode-go": { "authCookie": "x", "workspaceId": "w", "serverId": "s", "functionId": 31 }
-            }
-        }"#;
-        let cfg: Config = serde_json::from_str(raw).unwrap();
+    fn reads_namespaced_toml_config() {
+        let raw = r#"
+default = "anthropic"
+sub_day = 5
+
+[providers.anthropic]
+admin_key = "sk-ant-admin-x"
+allowance = 200.0
+
+[providers."opencode-go"]
+auth_cookie = "x"
+workspace_id = "w"
+server_id = "s"
+function_id = 31
+"#;
+        let cfg: Config = toml::from_str(raw).unwrap();
         assert_eq!(cfg.default, "anthropic");
         assert_eq!(cfg.sub_day, 5);
         assert_eq!(cfg.providers.len(), 2);
+        cfg.validate().unwrap();
+    }
+
+    #[test]
+    fn deny_unknown_top_level_fields() {
+        let raw = r#"
+default = "anthropic"
+sub_day = 5
+mystery_field = 42
+providers = {}
+"#;
+        let err = toml::from_str::<Config>(raw).unwrap_err();
+        assert!(
+            err.to_string().contains("unknown field"),
+            "expected unknown-field error, got: {err}"
+        );
+    }
+
+    #[test]
+    fn validate_rejects_sub_day_out_of_range() {
+        let cfg = Config {
+            sub_day: 0,
+            ..Default::default()
+        };
+        assert!(cfg.validate().is_err());
+        let cfg = Config {
+            sub_day: 32,
+            ..Default::default()
+        };
+        assert!(cfg.validate().is_err());
+    }
+
+    #[test]
+    fn validate_rejects_default_not_in_providers() {
+        let cfg = Config {
+            sub_day: 5,
+            default: "ghost".to_string(),
+            ..Default::default()
+        };
+        assert!(cfg.validate().is_err());
+    }
+
+    #[test]
+    fn validate_rejects_unknown_provider_id() {
+        let raw = r#"
+sub_day = 5
+
+[providers."unknown-provider"]
+foo = "bar"
+"#;
+        let cfg: Config = toml::from_str(raw).unwrap();
+        assert!(cfg.validate().is_err());
+    }
+
+    #[test]
+    fn validate_rejects_bad_provider_blob_missing_field() {
+        let raw = r#"
+sub_day = 5
+
+[providers."opencode-go"]
+auth_cookie = "x"
+"#;
+        let cfg: Config = toml::from_str(raw).unwrap();
+        assert!(cfg.validate().is_err());
+    }
+
+    #[test]
+    fn validate_rejects_bad_provider_blob_unknown_field() {
+        let raw = r#"
+sub_day = 5
+
+[providers.anthropic]
+admin_key = "sk-ant-admin-x"
+allowance = 200.0
+typo_field = "oops"
+"#;
+        let cfg: Config = toml::from_str(raw).unwrap();
+        assert!(cfg.validate().is_err());
     }
 
     #[test]

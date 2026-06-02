@@ -1,7 +1,7 @@
 // Provider abstraction. Each provider owns its HTTP, parsing, and aggregation;
 // the orchestrator only consumes ReportView.
 
-use anyhow::Result;
+use anyhow::{Result, bail};
 use serde_json::Value;
 
 use crate::billing::BillingPeriod;
@@ -35,3 +35,14 @@ pub fn by_id(id: &str) -> Option<Box<dyn Provider>> {
 }
 
 pub const ALL_IDS: &[&str] = &[opencode_go::ID, anthropic::ID];
+
+pub fn validate_provider_blob(id: &str, blob: &Value) -> Result<()> {
+    match id {
+        opencode_go::ID => opencode_go::validate(blob),
+        anthropic::ID => anthropic::validate(blob),
+        other => bail!(
+            "Unknown provider id '{other}'. Known: {}",
+            ALL_IDS.join(", ")
+        ),
+    }
+}
