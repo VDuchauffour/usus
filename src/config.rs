@@ -49,7 +49,7 @@ pub fn config_dir() -> Result<PathBuf> {
 }
 
 pub fn config_path() -> Result<PathBuf> {
-    Ok(config_dir()?.join("config.yaml"))
+    Ok(config_dir()?.join("config.toml"))
 }
 
 pub fn load() -> Result<Config> {
@@ -60,7 +60,7 @@ pub fn load() -> Result<Config> {
     }
     let raw = fs::read_to_string(&path)
         .with_context(|| format!("Reading config at {}", path.display()))?;
-    let cfg: Config = serde_yml::from_str(&raw).context("Parsing config YAML")?;
+    let cfg: Config = toml::from_str(&raw).context("Parsing config TOML")?;
     cfg.validate()?;
     Ok(cfg)
 }
@@ -72,15 +72,15 @@ pub fn load_or_default() -> Result<Config> {
     }
     let raw = fs::read_to_string(&path)
         .with_context(|| format!("Reading config at {}", path.display()))?;
-    serde_yml::from_str(&raw).context("Parsing config YAML")
+    toml::from_str(&raw).context("Parsing config TOML")
 }
 
 pub fn save(cfg: &Config) -> Result<()> {
     cfg.validate().context("Refusing to save invalid config")?;
     fs::create_dir_all(config_dir()?)?;
     let path = config_path()?;
-    let yaml = serde_yml::to_string(cfg).context("Serializing config to YAML")?;
-    fs::write(&path, yaml).with_context(|| format!("Writing config to {}", path.display()))?;
+    let text = toml::to_string_pretty(cfg).context("Serializing config to TOML")?;
+    fs::write(&path, text).with_context(|| format!("Writing config to {}", path.display()))?;
     Ok(())
 }
 
@@ -114,21 +114,22 @@ mod tests {
     use super::*;
 
     #[test]
-    fn reads_namespaced_yaml_config() {
+    fn reads_namespaced_toml_config() {
         let raw = r#"
-default: anthropic
-sub_day: 5
-providers:
-  anthropic:
-    admin_key: sk-ant-admin-x
-    allowance: 200.0
-  opencode-go:
-    auth_cookie: x
-    workspace_id: w
-    server_id: s
-    function_id: 31
+default = "anthropic"
+sub_day = 5
+
+[providers.anthropic]
+admin_key = "sk-ant-admin-x"
+allowance = 200.0
+
+[providers."opencode-go"]
+auth_cookie = "x"
+workspace_id = "w"
+server_id = "s"
+function_id = 31
 "#;
-        let cfg: Config = serde_yml::from_str(raw).unwrap();
+        let cfg: Config = toml::from_str(raw).unwrap();
         assert_eq!(cfg.default, "anthropic");
         assert_eq!(cfg.sub_day, 5);
         assert_eq!(cfg.providers.len(), 2);
@@ -138,12 +139,12 @@ providers:
     #[test]
     fn deny_unknown_top_level_fields() {
         let raw = r#"
-default: anthropic
-sub_day: 5
-providers: {}
-mystery_field: 42
+default = "anthropic"
+sub_day = 5
+mystery_field = 42
+providers = {}
 "#;
-        let err = serde_yml::from_str::<Config>(raw).unwrap_err();
+        let err = toml::from_str::<Config>(raw).unwrap_err();
         assert!(
             err.to_string().contains("unknown field"),
             "expected unknown-field error, got: {err}"
@@ -177,38 +178,38 @@ mystery_field: 42
     #[test]
     fn validate_rejects_unknown_provider_id() {
         let raw = r#"
-sub_day: 5
-providers:
-  unknown-provider:
-    foo: bar
+sub_day = 5
+
+[providers."unknown-provider"]
+foo = "bar"
 "#;
-        let cfg: Config = serde_yml::from_str(raw).unwrap();
+        let cfg: Config = toml::from_str(raw).unwrap();
         assert!(cfg.validate().is_err());
     }
 
     #[test]
     fn validate_rejects_bad_provider_blob_missing_field() {
         let raw = r#"
-sub_day: 5
-providers:
-  opencode-go:
-    auth_cookie: x
+sub_day = 5
+
+[providers."opencode-go"]
+auth_cookie = "x"
 "#;
-        let cfg: Config = serde_yml::from_str(raw).unwrap();
+        let cfg: Config = toml::from_str(raw).unwrap();
         assert!(cfg.validate().is_err());
     }
 
     #[test]
     fn validate_rejects_bad_provider_blob_unknown_field() {
         let raw = r#"
-sub_day: 5
-providers:
-  anthropic:
-    admin_key: sk-ant-admin-x
-    allowance: 200.0
-    typo_field: oops
+sub_day = 5
+
+[providers.anthropic]
+admin_key = "sk-ant-admin-x"
+allowance = 200.0
+typo_field = "oops"
 "#;
-        let cfg: Config = serde_yml::from_str(raw).unwrap();
+        let cfg: Config = toml::from_str(raw).unwrap();
         assert!(cfg.validate().is_err());
     }
 

@@ -25,8 +25,7 @@ pub struct Config {
 }
 
 pub fn validate(blob: &Value) -> Result<()> {
-    let _: Config =
-        serde_json::from_value(blob.clone()).context("opencode-go provider config")?;
+    let _: Config = serde_json::from_value(blob.clone()).context("opencode-go provider config")?;
     Ok(())
 }
 
