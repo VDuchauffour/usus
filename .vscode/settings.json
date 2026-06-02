@@ -1,5 +1,8 @@
 {
   "rust-analyzer.checkOnSave": true,
+  "rust-analyzer.server.extraEnv": {
+    "CARGO_TARGET_DIR": "target/rust-analyzer"
+  },
   "files.exclude": {
     "**/.git": true,
     "**/.coverage": true,
