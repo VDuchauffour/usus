@@ -48,8 +48,8 @@ repos:
         entry: just check
         language: system
         pass_filenames: false
-      - id: just-ci
-        name: just ci
-        entry: just ci
+      - id: just-ci-fix
+        name: just ci-fix
+        entry: just ci-fix
         language: system
         pass_filenames: false

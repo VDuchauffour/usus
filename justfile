@@ -22,6 +22,9 @@ lint:
 lint-strict:
     cargo clippy --all-targets --all-features --locked -- -D warnings
 
+lint-strict-fix:
+    cargo clippy --fix --all-targets --all-features --locked -- -D warnings
+
 fmt:
     cargo fmt
 
@@ -32,6 +35,8 @@ check:
     cargo check
 
 ci: fmt-check lint-strict test
+
+ci-fix: fmt lint-strict-fix test
 
 install:
     cargo install --path .
