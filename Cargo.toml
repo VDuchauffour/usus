@@ -6,6 +6,8 @@ description = "Your best partner for AI harnesses"
 license = "MIT"
 
 [dependencies]
+anstream = "1.0.0"
+anstyle = "1.0.14"
 anyhow = "1"
 boa_engine = "0.21"
 chrono = { version = "0.4", default-features = false, features = [

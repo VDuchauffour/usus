@@ -2964,6 +2964,8 @@ dependencies = [
 name = "usus"
 version = "0.0.1"
 dependencies = [
+ "anstream",
+ "anstyle",
  "anyhow",
  "boa_engine",
  "chrono",
