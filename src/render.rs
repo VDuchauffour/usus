@@ -1,7 +1,4 @@
-// Render via ratatui (Viewport::Inline — one-shot, no raw mode).
-//
-// The report UI is rendered with ratatui using `Viewport::Inline` for a
-// one-shot draw — no raw mode, no alt-screen, standard scrollback.
+// Render via ratatui (Viewport::Inline - one-shot, no raw mode, no alt-screen).
 
 use anyhow::Result;
 use ratatui::{
@@ -11,10 +8,10 @@ use ratatui::{
     text::{Line, Span},
     widgets::Paragraph,
 };
-use std::io::{self, Write};
+use std::io;
 
-pub const ALLOWANCE: f64 = 60.0;
-pub const COST_DIVISOR: f64 = 100_000_000.0;
+use crate::providers::ReportView;
+
 const PANEL_WIDTH: usize = 52;
 
 /// Mimic the JS regex `/^[^\s]+@[^\s]+\s+-\s+/` stripping a `someone@host - ` prefix.
@@ -42,7 +39,6 @@ fn strip_email_prefix(s: &str) -> String {
     chars[j..].iter().collect()
 }
 
-/// Truncate or pad `name` to exactly `width` display columns.
 fn truncate_or_pad(name: &str, width: usize) -> String {
     let count = name.chars().count();
     if count > width {
@@ -56,7 +52,6 @@ fn truncate_or_pad(name: &str, width: usize) -> String {
     }
 }
 
-/// Right-align `s` in a field of `width` columns.
 fn pad_left(s: &str, width: usize) -> String {
     let count = s.chars().count();
     if count >= width {
@@ -69,9 +64,16 @@ fn pad_left(s: &str, width: usize) -> String {
     }
 }
 
-pub fn render(results: &[(String, f64)], total_cost: f64, billing_end: &str) -> Result<()> {
-    let remaining = ALLOWANCE - total_cost;
-    let pct_used = (total_cost / ALLOWANCE) * 100.0;
+pub fn render(view: &ReportView) -> Result<()> {
+    let currency = view.currency;
+    let allowance = view.allowance;
+    let total_cost = view.total_cost;
+    let remaining = allowance - total_cost;
+    let pct_used = if allowance > 0.0 {
+        (total_cost / allowance) * 100.0
+    } else {
+        0.0
+    };
 
     let bar_w = PANEL_WIDTH - 7;
     let filled = ((pct_used / 100.0) * bar_w as f64).round() as usize;
@@ -87,29 +89,26 @@ pub fn render(results: &[(String, f64)], total_cost: f64, billing_end: &str) -> 
     let pct_label = pad_left(&format!("{pct_used:.1}%"), 6);
 
     let hr: String = "─".repeat(PANEL_WIDTH);
-    let renew_str = if billing_end.is_empty() {
+    let renew_str = if view.period_end.is_empty() {
         String::new()
     } else {
-        format!("Renews {billing_end}")
+        format!("Renews {}", view.period_end)
     };
-    let title = "OpenCode GO";
+    let title = view.title.as_str();
     let h_pad_len = PANEL_WIDTH
         .saturating_sub(title.chars().count() + renew_str.chars().count())
         .max(1);
     let h_pad = " ".repeat(h_pad_len);
 
-    let used_str = format!("${total_cost:.2} / ${ALLOWANCE:.2}");
-    let rem_str = format!("${remaining:.2} remaining");
+    let used_str = format!("{currency}{total_cost:.2} / {currency}{allowance:.2}");
+    let rem_str = format!("{currency}{remaining:.2} remaining");
     let c_pad_len = PANEL_WIDTH
         .saturating_sub(used_str.chars().count() + rem_str.chars().count())
         .max(1);
     let c_pad = " ".repeat(c_pad_len);
 
-    // Build lines.
     let mut lines: Vec<Line> = vec![
-        // blank line
         Line::raw(""),
-        // title + renew
         Line::from(vec![
             Span::styled(
                 format!("  {title}"),
@@ -120,37 +119,37 @@ pub fn render(results: &[(String, f64)], total_cost: f64, billing_end: &str) -> 
             Span::raw(h_pad.to_string()),
             Span::styled(renew_str, Style::default().dim()),
         ]),
-        // hr
         Line::from(vec![Span::styled(
             format!("  {hr}"),
             Style::default().dim(),
         )]),
-        // bar
         Line::from(vec![
             Span::raw("  "),
             Span::styled("█".repeat(filled), Style::default().fg(bar_color)),
             Span::styled("░".repeat(empty), Style::default().dim()),
             Span::raw(format!(" {pct_label}")),
         ]),
-        // used + remaining
         Line::from(vec![
             Span::raw("  ".to_string()),
             Span::styled(used_str, Style::default().add_modifier(Modifier::BOLD)),
             Span::raw(c_pad),
             Span::styled(rem_str, Style::default().fg(Color::Green)),
         ]),
-        // hr
         Line::from(vec![Span::styled(
             format!("  {hr}"),
             Style::default().dim(),
         )]),
     ];
 
-    for (name, cost) in results {
+    for (name, cost) in &view.rows {
         let stripped = strip_email_prefix(name);
         let display = truncate_or_pad(&stripped, 32);
-        let cost_str = pad_left(&format!("${cost:.4}"), 10);
-        let pct = pad_left(&format!("{:.1}%", (cost / ALLOWANCE) * 100.0), 6);
+        let cost_str = pad_left(&format!("{currency}{cost:.4}"), 10);
+        let pct = if allowance > 0.0 {
+            pad_left(&format!("{:.1}%", (cost / allowance) * 100.0), 6)
+        } else {
+            pad_left("--", 6)
+        };
         lines.push(Line::from(vec![
             Span::raw(format!("  {display}  ")),
             Span::styled(cost_str, Style::default().add_modifier(Modifier::BOLD)),
@@ -159,13 +158,8 @@ pub fn render(results: &[(String, f64)], total_cost: f64, billing_end: &str) -> 
         ]));
     }
 
-    lines.push(Line::raw("")); // trailing blank
+    lines.push(Line::raw(""));
 
-    // Erase the "Fetching usage data..." line.
-    print!("\x1b[1A\x1b[2K");
-    io::stdout().flush()?;
-
-    // One-shot ratatui draw with inline viewport (no raw mode, no alt-screen).
     let backend = CrosstermBackend::new(io::stdout());
     let height = lines.len() as u16;
     let mut terminal = Terminal::with_options(

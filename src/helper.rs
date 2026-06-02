@@ -1,14 +1,6 @@
 use anyhow::{Result, anyhow, bail};
 use std::io::{self, BufRead, Write};
 
-const RED: &str = "\x1b[0;31m";
-const RESET: &str = "\x1b[0m";
-
-pub fn die(msg: &str) -> ! {
-    eprintln!("{RED}Error:{RESET} {msg}");
-    std::process::exit(1);
-}
-
 pub fn read_line(prompt: &str) -> Result<String> {
     print!("{prompt}");
     io::stdout().flush()?;
