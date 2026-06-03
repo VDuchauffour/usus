@@ -7,7 +7,7 @@ use std::time::Duration;
 use crate::billing::current_period;
 use crate::config::{load, pick_provider_id};
 use crate::providers::by_id;
-use crate::render::render;
+use crate::ui::render::render;
 
 fn get_spinner() -> ProgressBar {
     let spinner = ProgressBar::new_spinner();
