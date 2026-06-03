@@ -15,6 +15,8 @@ chrono = { version = "0.4", default-features = false, features = [
   "std",
 ] }
 clap = { version = "4", features = ["derive"] }
+console = "0.16.3"
+dialoguer = "0.12.0"
 dirs = "6"
 indicatif = "0.18.4"
 ratatui = "0.30"
