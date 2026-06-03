@@ -24,6 +24,9 @@ pub fn cmd_login(
     if admin_key.is_empty() {
         bail!("Admin key cannot be empty.");
     }
+    if !admin_key.starts_with("sk-ant-admin") {
+        bail!("This is not a valid admin key.")
+    }
 
     let allowance = match allowance {
         Some(v) => v,

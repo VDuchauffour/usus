@@ -22,6 +22,9 @@ pub fn cmd_login(
     if auth_cookie.is_empty() {
         bail!("Auth cookie cannot be empty.");
     }
+    if !auth_cookie.starts_with("Fe26.2**") {
+        bail!("This is not a valid auth cookie.")
+    }
     println!("{GREEN}Auth cookie saved.{RESET}");
     println!();
 
