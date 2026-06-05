@@ -1,5 +1,7 @@
-use clap::builder::Styles;
-use clap::builder::styling::{AnsiColor, Effects};
+use clap::builder::{
+    Styles,
+    styling::{AnsiColor, Effects},
+};
 
 pub const RED: &str = "\x1b[0;31m";
 pub const GREEN: &str = "\x1b[0;32m";

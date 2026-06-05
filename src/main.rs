@@ -1,10 +1,11 @@
 use anyhow::Result;
 use clap::Parser;
-
-use usus::cli::{Cli, Command, LoginProvider};
-use usus::providers::{anthropic, opencode_go};
-use usus::report;
-use usus::style::{RED, RESET};
+use usus::{
+    cli::command::{Cli, Command, LoginProvider},
+    providers::{anthropic, opencode_go},
+    report,
+    style::{RED, RESET},
+};
 
 pub fn run(cli: Cli) -> Result<()> {
     match cli.command {

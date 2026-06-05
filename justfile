@@ -26,10 +26,10 @@ lint-strict-fix:
     cargo clippy --fix --allow-dirty --all-targets --all-features --locked -- -D warnings
 
 fmt:
-    cargo fmt
+    cargo +nightly fmt
 
 fmt-check:
-    cargo fmt --check
+    cargo +nightly fmt --check
 
 check:
     cargo check

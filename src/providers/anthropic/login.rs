@@ -1,9 +1,11 @@
 use anyhow::{Result, anyhow, bail};
 
-use crate::config::{config_path, load_or_default, save};
-use crate::helper::{prompt_sub_day, read_line, read_with_default};
-use crate::providers::anthropic::{Config, DEFAULT_ALLOWANCE, ID};
-use crate::style::{BOLD, DIM, GREEN, RESET};
+use crate::{
+    config::{config_path, load_or_default, save},
+    helper::{prompt_sub_day, read_line, read_with_default},
+    providers::anthropic::{Config, DEFAULT_ALLOWANCE, ID},
+    style::{BOLD, DIM, GREEN, RESET},
+};
 
 pub fn cmd_login(
     admin_key: Option<String>,

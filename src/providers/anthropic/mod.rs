@@ -1,10 +1,13 @@
+use std::collections::HashMap;
+
 use anyhow::{Context as _, Result, bail};
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
-use std::collections::HashMap;
 
-use crate::billing::BillingPeriod;
-use crate::providers::{Provider, ReportView};
+use crate::{
+    billing::BillingPeriod,
+    providers::{Provider, ReportView},
+};
 
 pub mod login;
 
@@ -291,8 +294,9 @@ fn send_admin(req: reqwest::blocking::RequestBuilder, cfg: &Config) -> Result<St
 
 #[cfg(test)]
 mod tests {
-    use super::*;
     use serde_json::json;
+
+    use super::*;
 
     #[test]
     fn sum_token_fields_handles_missing_and_cache_creation_object() {
