@@ -1,44 +1,39 @@
-use anyhow::{Result, anyhow, bail};
+use anyhow::{Result, bail};
+use console::style;
+use dialoguer::Input;
 
+use crate::cli::prompt::prompt_number;
 use crate::config::{config_path, load_or_default, save};
-use crate::helper::{prompt_sub_day, read_line, read_with_default};
+use crate::helper::{initial_login_message, prompt_sub_day};
 use crate::providers::anthropic::{Config, DEFAULT_ALLOWANCE, ID};
-use crate::style::{BOLD, DIM, GREEN, RESET};
 
 pub fn cmd_login(
     admin_key: Option<String>,
     allowance: Option<f64>,
     sub_day: Option<u32>,
 ) -> Result<()> {
-    println!("{BOLD}Anthropic API setup{RESET}");
-    println!();
-    println!("You need an Admin API key:");
-    println!("  1. Open https://console.anthropic.com/settings/admin-keys");
-    println!("  2. Create an Admin key (starts with 'sk-ant-admin01-...')");
-    println!();
+    initial_login_message(
+        "Anthropic API setup",
+        "You need an Admin API key:
+1. Open https://console.anthropic.com/settings/admin-keys
+2. Create an Admin key (starts with 'sk-ant-admin01-...')",
+    );
 
-    let admin_key = match admin_key {
+    let admin_key: String = match admin_key {
         Some(v) => v,
-        None => read_line("Paste your Admin API key: ")?,
+        None => Input::new()
+            .with_prompt("Admin API key")
+            .interact_text()
+            .unwrap(),
     };
     if admin_key.is_empty() {
         bail!("Admin key cannot be empty.");
     }
     if !admin_key.starts_with("sk-ant-admin") {
-        bail!("This is not a valid admin key.")
+        bail!("This is not a valid admin key.");
     }
 
-    let allowance = match allowance {
-        Some(v) => v,
-        None => {
-            let s = read_with_default(
-                &format!("Monthly allowance in USD [{DEFAULT_ALLOWANCE}]: "),
-                &DEFAULT_ALLOWANCE.to_string(),
-            )?;
-            s.parse()
-                .map_err(|_| anyhow!("Allowance must be a number"))?
-        }
-    };
+    let allowance: f64 = prompt_number(allowance, "Monthly allowance in USD", DEFAULT_ALLOWANCE)?;
 
     let cfg = Config {
         admin_key,
@@ -57,7 +52,10 @@ pub fn cmd_login(
             None => {
                 println!();
                 println!("What day of the month does your billing cycle start?");
-                println!("{DIM}(e.g., if you subscribed on 20-Apr, enter 20){RESET}");
+                println!(
+                    "{}",
+                    style("(e.g., if you subscribed on 20-Apr, enter 20)").dim()
+                );
                 prompt_sub_day()?
             }
         };
@@ -67,8 +65,12 @@ pub fn cmd_login(
 
     save(&top)?;
     println!(
-        "{GREEN}Provider '{ID}' saved to {}{RESET}",
-        config_path()?.display()
+        "{}",
+        style(format!(
+            "Provider '{ID}' saved to {}",
+            config_path()?.display()
+        ))
+        .green()
     );
     Ok(())
 }

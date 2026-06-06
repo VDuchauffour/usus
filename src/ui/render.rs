@@ -1,5 +1,7 @@
 // Render via ratatui (Viewport::Inline - one-shot, no raw mode, no alt-screen).
 
+use std::io;
+
 use anyhow::Result;
 use ratatui::{
     Terminal, TerminalOptions, Viewport,
@@ -8,7 +10,6 @@ use ratatui::{
     text::{Line, Span},
     widgets::Paragraph,
 };
-use std::io;
 
 use crate::providers::ReportView;
 

@@ -1,13 +1,16 @@
 // Report command - thin orchestrator. Provider does the work.
 
-use anyhow::{Result, anyhow};
-use indicatif::{ProgressBar, ProgressStyle};
 use std::time::Duration;
 
-use crate::billing::current_period;
-use crate::config::{load, pick_provider_id};
-use crate::providers::by_id;
-use crate::ui::render::render;
+use anyhow::{Result, anyhow};
+use indicatif::{ProgressBar, ProgressStyle};
+
+use crate::{
+    billing::current_period,
+    config::{load, pick_provider_id},
+    providers::by_id,
+    ui::render::render,
+};
 
 fn get_spinner() -> ProgressBar {
     let spinner = ProgressBar::new_spinner();

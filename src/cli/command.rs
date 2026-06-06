@@ -1,17 +1,6 @@
-use clap::builder::Styles;
-use clap::builder::styling::{AnsiColor, Effects};
 use clap::{Parser, Subcommand};
 
-fn cargo_styles() -> Styles {
-    Styles::styled()
-        .header(AnsiColor::Green.on_default().effects(Effects::BOLD))
-        .usage(AnsiColor::Green.on_default().effects(Effects::BOLD))
-        .literal(AnsiColor::Cyan.on_default().effects(Effects::BOLD))
-        .placeholder(AnsiColor::Cyan.on_default())
-        .error(AnsiColor::Red.on_default().effects(Effects::BOLD))
-        .valid(AnsiColor::Cyan.on_default().effects(Effects::BOLD))
-        .invalid(AnsiColor::Yellow.on_default().effects(Effects::BOLD))
-}
+use crate::style::cargo_styles;
 
 #[derive(Parser)]
 #[command(name = "usus", version, about = "Your best partner for AI harnesses",styles = cargo_styles())]

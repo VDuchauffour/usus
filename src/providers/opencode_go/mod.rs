@@ -1,10 +1,13 @@
+use std::collections::{HashMap, HashSet};
+
 use anyhow::{Context as _, Result};
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
-use std::collections::{HashMap, HashSet};
 
-use crate::billing::BillingPeriod;
-use crate::providers::{Provider, ReportView};
+use crate::{
+    billing::BillingPeriod,
+    providers::{Provider, ReportView},
+};
 
 pub mod http;
 pub mod login;
