@@ -5,7 +5,7 @@ use std::time::Duration;
 use anyhow::{Result, anyhow};
 use indicatif::{ProgressBar, ProgressStyle};
 
-use crate::{billing::current_period, config::load, providers::by_id, ui::render::render};
+use crate::{billing::BillingPeriod, config::load, providers::by_id, ui::render::render};
 
 fn get_spinner() -> ProgressBar {
     let spinner = ProgressBar::new_spinner();
@@ -29,7 +29,7 @@ pub fn run(provider_flag: Option<&str>) -> Result<()> {
         .get(&provider_id)
         .ok_or_else(|| anyhow!("Provider '{provider_id}' not configured"))?;
 
-    let period = current_period(cfg.sub_day);
+    let period = BillingPeriod::current(cfg.sub_day);
     let spinner = get_spinner();
     let result = provider.fetch_report(provider_cfg, &period);
     spinner.finish_and_clear();
