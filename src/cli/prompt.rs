@@ -1,3 +1,6 @@
+use std::fmt::{Debug, Display};
+use std::str::FromStr;
+
 use anyhow::Result;
 use dialoguer::Input;
 
@@ -11,10 +14,14 @@ pub fn prompt_string(value: Option<String>, prompt: &str, default: &str) -> Resu
     }
 }
 
-pub fn prompt_i64(value: Option<i64>, prompt: &str, default: i64) -> Result<i64> {
+pub fn prompt_number<T>(value: Option<T>, prompt: &str, default: T) -> Result<T>
+where
+    T: Clone + ToString + FromStr,
+    <T as FromStr>::Err: Display + Debug,
+{
     match value {
         Some(v) => Ok(v),
-        None => Ok(Input::new()
+        None => Ok(Input::<T>::new()
             .with_prompt(prompt)
             .default(default)
             .interact_text()?),

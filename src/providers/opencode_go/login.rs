@@ -2,7 +2,7 @@ use anyhow::{Result, bail};
 use console::style;
 use dialoguer::Input;
 
-use crate::cli::prompt::{prompt_i64, prompt_string};
+use crate::cli::prompt::{prompt_number, prompt_string};
 use crate::config::{config_path, load_or_default, save};
 use crate::helper::{initial_login_message, prompt_sub_day};
 use crate::providers::opencode_go::{Config, ID};
@@ -42,7 +42,7 @@ pub fn cmd_login(
         "Server ID",
         "15702f3a12ff8bff357f8c2aa154a17e65b746d5f6b96adc9002c86ee0c15205",
     )?;
-    let function_id: i64 = prompt_i64(function_id, "Function ID", 31)?;
+    let function_id: i64 = prompt_number(function_id, "Function ID", 31)?;
 
     let cfg = Config {
         auth_cookie,
