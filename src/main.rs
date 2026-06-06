@@ -1,28 +1,14 @@
 use anyhow::Result;
 use clap::Parser;
 use usus::{
-    cli::command::{Cli, Command, LoginProvider},
-    providers::{anthropic, opencode_go},
-    report,
+    cli::command::{Cli, Command, login, report},
     style::{RED, RESET},
 };
 
 pub fn run(cli: Cli) -> Result<()> {
     match cli.command {
-        Command::Login { provider } => match provider {
-            LoginProvider::OpencodeGo {
-                workspace_id,
-                server_id,
-                function_id,
-                sub_day,
-            } => opencode_go::login::cmd_login(workspace_id, server_id, function_id, sub_day),
-            LoginProvider::Anthropic {
-                admin_key,
-                allowance,
-                sub_day,
-            } => anthropic::login::cmd_login(admin_key, allowance, sub_day),
-        },
-        Command::Report { provider } => report::cmd_report(provider.as_deref()),
+        Command::Login { provider } => login::run(provider),
+        Command::Report { provider } => report::run(provider.as_deref()),
     }
 }
 

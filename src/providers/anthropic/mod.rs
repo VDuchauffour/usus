@@ -9,8 +9,6 @@ use crate::{
     providers::{Provider, ReportView},
 };
 
-pub mod login;
-
 pub const ID: &str = "anthropic";
 
 const ADMIN_API_BASE: &str = "https://api.anthropic.com/v1/organizations";

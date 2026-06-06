@@ -2,6 +2,9 @@ use clap::{Parser, Subcommand};
 
 use crate::style::cargo_styles;
 
+pub mod login;
+pub mod report;
+
 #[derive(Parser)]
 #[command(name = "usus", version, about = "Your best partner for AI harnesses",styles = cargo_styles())]
 pub struct Cli {

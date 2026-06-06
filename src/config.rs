@@ -39,6 +39,31 @@ impl Config {
         }
         Ok(())
     }
+
+    pub fn pick_provider_id(&self, explicit: Option<&str>) -> Result<String> {
+        if let Some(id) = explicit {
+            if self.providers.contains_key(id) {
+                return Ok(id.to_string());
+            }
+            let prog = env::args().next().unwrap_or_else(|| "usus".into());
+            bail!("Provider '{id}' is not configured. Run '{prog} login {id}' first.");
+        }
+        if !self.default.is_empty() && self.providers.contains_key(&self.default) {
+            return Ok(self.default.clone());
+        }
+        if self.providers.len() == 1 {
+            return Ok(self.providers.keys().next().unwrap().clone());
+        }
+        let configured: Vec<String> = self.providers.keys().cloned().collect();
+        bail!(
+            "No default provider configured. Pass --provider <id>. Configured: {}",
+            if configured.is_empty() {
+                "none".to_string()
+            } else {
+                configured.join(", ")
+            }
+        );
+    }
 }
 
 pub fn config_dir() -> Result<PathBuf> {
@@ -81,31 +106,6 @@ pub fn save(cfg: &Config) -> Result<()> {
     let text = toml::to_string_pretty(cfg).context("Serializing config to TOML")?;
     fs::write(&path, text).with_context(|| format!("Writing config to {}", path.display()))?;
     Ok(())
-}
-
-pub fn pick_provider_id(cfg: &Config, explicit: Option<&str>) -> Result<String> {
-    if let Some(id) = explicit {
-        if cfg.providers.contains_key(id) {
-            return Ok(id.to_string());
-        }
-        let prog = env::args().next().unwrap_or_else(|| "usus".into());
-        bail!("Provider '{id}' is not configured. Run '{prog} login {id}' first.");
-    }
-    if !cfg.default.is_empty() && cfg.providers.contains_key(&cfg.default) {
-        return Ok(cfg.default.clone());
-    }
-    if cfg.providers.len() == 1 {
-        return Ok(cfg.providers.keys().next().unwrap().clone());
-    }
-    let configured: Vec<String> = cfg.providers.keys().cloned().collect();
-    bail!(
-        "No default provider configured. Pass --provider <id>. Configured: {}",
-        if configured.is_empty() {
-            "none".to_string()
-        } else {
-            configured.join(", ")
-        }
-    );
 }
 
 #[cfg(test)]
@@ -216,7 +216,7 @@ typo_field = "oops"
     fn pick_provider_falls_back_to_single_configured() {
         let mut cfg = Config::default();
         cfg.providers.insert("anthropic".to_string(), Value::Null);
-        assert_eq!(pick_provider_id(&cfg, None).unwrap(), "anthropic");
+        assert_eq!(cfg.pick_provider_id(None).unwrap(), "anthropic");
     }
 
     #[test]
@@ -226,7 +226,7 @@ typo_field = "oops"
         cfg.providers.insert("anthropic".to_string(), Value::Null);
         cfg.default = "opencode-go".to_string();
         assert_eq!(
-            pick_provider_id(&cfg, Some("anthropic")).unwrap(),
+            cfg.pick_provider_id(Some("anthropic")).unwrap(),
             "anthropic"
         );
     }
@@ -234,6 +234,6 @@ typo_field = "oops"
     #[test]
     fn pick_provider_rejects_unknown_explicit() {
         let cfg = Config::default();
-        assert!(pick_provider_id(&cfg, Some("does-not-exist")).is_err());
+        assert!(cfg.pick_provider_id(Some("does-not-exist")).is_err());
     }
 }
