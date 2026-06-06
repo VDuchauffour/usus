@@ -1,9 +1,22 @@
 use clap::{Parser, Subcommand};
 
-use crate::style::cargo_styles;
-
 pub mod login;
 pub mod report;
+use clap::builder::{
+    Styles,
+    styling::{AnsiColor, Effects},
+};
+
+pub fn cargo_styles() -> Styles {
+    Styles::styled()
+        .header(AnsiColor::Green.on_default().effects(Effects::BOLD))
+        .usage(AnsiColor::Green.on_default().effects(Effects::BOLD))
+        .literal(AnsiColor::Cyan.on_default().effects(Effects::BOLD))
+        .placeholder(AnsiColor::Cyan.on_default())
+        .error(AnsiColor::Red.on_default().effects(Effects::BOLD))
+        .valid(AnsiColor::Cyan.on_default().effects(Effects::BOLD))
+        .invalid(AnsiColor::Yellow.on_default().effects(Effects::BOLD))
+}
 
 #[derive(Parser)]
 #[command(name = "usus", version, about = "Your best partner for AI harnesses",styles = cargo_styles())]

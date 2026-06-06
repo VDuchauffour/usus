@@ -1,9 +1,7 @@
 use anyhow::Result;
 use clap::Parser;
-use usus::{
-    cli::command::{Cli, Command, login, report},
-    style::{RED, RESET},
-};
+use console::style;
+use usus::cli::command::{Cli, Command, login, report};
 
 pub fn run(cli: Cli) -> Result<()> {
     match cli.command {
@@ -15,7 +13,7 @@ pub fn run(cli: Cli) -> Result<()> {
 fn main() {
     let cli = Cli::parse();
     if let Err(e) = run(cli) {
-        eprintln!("{RED}Error:{RESET} {e:#}");
+        eprintln!("{} {e:#}", style("Error:").red());
         std::process::exit(1);
     }
 }
