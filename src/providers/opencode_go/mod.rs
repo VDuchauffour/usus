@@ -10,7 +10,6 @@ use crate::{
 };
 
 pub mod http;
-pub mod login;
 pub mod parser;
 
 pub const ID: &str = "opencode-go";

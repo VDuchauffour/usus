@@ -5,12 +5,7 @@ use std::time::Duration;
 use anyhow::{Result, anyhow};
 use indicatif::{ProgressBar, ProgressStyle};
 
-use crate::{
-    billing::current_period,
-    config::{load, pick_provider_id},
-    providers::by_id,
-    ui::render::render,
-};
+use crate::{billing::current_period, config::load, providers::by_id, ui::render::render};
 
 fn get_spinner() -> ProgressBar {
     let spinner = ProgressBar::new_spinner();
@@ -24,9 +19,9 @@ fn get_spinner() -> ProgressBar {
     spinner
 }
 
-pub fn cmd_report(provider_flag: Option<&str>) -> Result<()> {
+pub fn run(provider_flag: Option<&str>) -> Result<()> {
     let cfg = load()?;
-    let provider_id = pick_provider_id(&cfg, provider_flag)?;
+    let provider_id = cfg.pick_provider_id(provider_flag)?;
     let provider =
         by_id(&provider_id).ok_or_else(|| anyhow!("Unknown provider id '{provider_id}'"))?;
     let provider_cfg = cfg
