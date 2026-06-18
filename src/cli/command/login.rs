@@ -119,8 +119,8 @@ fn anthropic(
 fn persist_provider(id: &str, provider_blob: Value, sub_day: Option<u32>) -> Result<()> {
     let mut top = load_or_default()?;
     top.providers.insert(id.to_string(), provider_blob);
-    if top.default.is_empty() {
-        top.default = id.to_string();
+    if top.default_provider.is_empty() {
+        top.default_provider = id.to_string();
     }
     if top.sub_day == 0 {
         top.sub_day = match sub_day {

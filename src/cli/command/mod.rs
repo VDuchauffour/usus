@@ -34,7 +34,7 @@ pub enum Command {
     },
     /// Fetch and display current usage
     Report {
-        /// Provider id to query; defaults to the configured default
+        /// Provider id to query; fallback to the configured default
         #[arg(long, short)]
         provider: Option<String>,
     },

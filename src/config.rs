@@ -10,7 +10,7 @@ use crate::providers;
 #[serde(deny_unknown_fields)]
 pub struct Config {
     #[serde(default)]
-    pub default: String,
+    pub default_provider: String,
     #[serde(default)]
     pub sub_day: u32,
     #[serde(default)]
@@ -22,10 +22,11 @@ impl Config {
         if !(1..=31).contains(&self.sub_day) {
             bail!("sub_day must be between 1 and 31 (got {})", self.sub_day);
         }
-        if !self.default.is_empty() && !self.providers.contains_key(&self.default) {
+        if !self.default_provider.is_empty() && !self.providers.contains_key(&self.default_provider)
+        {
             bail!(
                 "default = '{}' but no such entry in providers map (have: {})",
-                self.default,
+                self.default_provider,
                 self.providers
                     .keys()
                     .cloned()
@@ -48,8 +49,9 @@ impl Config {
             let prog = env::args().next().unwrap_or_else(|| "usus".into());
             bail!("Provider '{id}' is not configured. Run '{prog} login {id}' first.");
         }
-        if !self.default.is_empty() && self.providers.contains_key(&self.default) {
-            return Ok(self.default.clone());
+        if !self.default_provider.is_empty() && self.providers.contains_key(&self.default_provider)
+        {
+            return Ok(self.default_provider.clone());
         }
         if self.providers.len() == 1 {
             return Ok(self.providers.keys().next().unwrap().clone());
@@ -115,7 +117,7 @@ mod tests {
     #[test]
     fn reads_namespaced_toml_config() {
         let raw = r#"
-default = "anthropic"
+default_provider = "anthropic"
 sub_day = 5
 
 [providers.anthropic]
@@ -129,7 +131,7 @@ server_id = "s"
 function_id = 31
 "#;
         let cfg: Config = toml::from_str(raw).unwrap();
-        assert_eq!(cfg.default, "anthropic");
+        assert_eq!(cfg.default_provider, "anthropic");
         assert_eq!(cfg.sub_day, 5);
         assert_eq!(cfg.providers.len(), 2);
         cfg.validate().unwrap();
@@ -138,7 +140,7 @@ function_id = 31
     #[test]
     fn deny_unknown_top_level_fields() {
         let raw = r#"
-default = "anthropic"
+default_provider = "anthropic"
 sub_day = 5
 mystery_field = 42
 providers = {}
@@ -168,7 +170,7 @@ providers = {}
     fn validate_rejects_default_not_in_providers() {
         let cfg = Config {
             sub_day: 5,
-            default: "ghost".to_string(),
+            default_provider: "ghost".to_string(),
             ..Default::default()
         };
         assert!(cfg.validate().is_err());
@@ -224,7 +226,7 @@ typo_field = "oops"
         let mut cfg = Config::default();
         cfg.providers.insert("opencode-go".to_string(), Value::Null);
         cfg.providers.insert("anthropic".to_string(), Value::Null);
-        cfg.default = "opencode-go".to_string();
+        cfg.default_provider = "opencode-go".to_string();
         assert_eq!(
             cfg.pick_provider_id(Some("anthropic")).unwrap(),
             "anthropic"
