@@ -48,7 +48,7 @@ You will be prompted for:
 Config lives at `~/.config/usus/config.toml`. Example:
 
 ```toml
-default = "anthropic"
+default_provider = "anthropic"
 sub_day = 5
 
 [providers.anthropic]
@@ -62,7 +62,7 @@ server_id = "15702f3a12ff8bff..."
 function_id = 31
 ```
 
-- `default` — the provider used when `--provider` is omitted
+- `default_provider` — the provider used when `--provider` is omitted
 - `sub_day` — day of the month the billing cycle starts (1–31)
 
 ## Development

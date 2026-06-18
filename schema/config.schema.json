@@ -1,0 +1,74 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://github.com/VDuchauffour/usus/schema/config.schema.json",
+  "title": "usus configuration",
+  "description": "Configuration file for usus, a CLI to track AI inference usage. Located at ~/.config/usus/config.toml.",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "default_provider": {
+      "type": "string",
+      "description": "Provider id used when --provider is omitted. Must match a key in `providers` (empty means no default)."
+    },
+    "sub_day": {
+      "type": "integer",
+      "description": "Day of the month the billing cycle starts.",
+      "minimum": 1,
+      "maximum": 31
+    },
+    "providers": {
+      "type": "object",
+      "description": "Configured providers, keyed by provider id.",
+      "additionalProperties": false,
+      "properties": {
+        "anthropic": {
+          "type": "object",
+          "description": "Anthropic Admin API provider settings.",
+          "additionalProperties": false,
+          "required": ["admin_key"],
+          "properties": {
+            "admin_key": {
+              "type": "string",
+              "description": "Anthropic Admin API key (starts with 'sk-ant-admin01-...')."
+            },
+            "allowance": {
+              "type": "number",
+              "description": "Monthly allowance in USD.",
+              "minimum": 0,
+              "default": 200.0
+            }
+          }
+        },
+        "opencode-go": {
+          "type": "object",
+          "description": "OpenCode GO provider settings.",
+          "additionalProperties": false,
+          "required": [
+            "auth_cookie",
+            "workspace_id",
+            "server_id",
+            "function_id"
+          ],
+          "properties": {
+            "auth_cookie": {
+              "type": "string",
+              "description": "Auth cookie from opencode.ai (starts with 'Fe26.2**')."
+            },
+            "workspace_id": {
+              "type": "string",
+              "description": "Workspace ID (e.g. wrk_...)."
+            },
+            "server_id": {
+              "type": "string",
+              "description": "Server ID."
+            },
+            "function_id": {
+              "type": "integer",
+              "description": "Function ID."
+            }
+          }
+        }
+      }
+    }
+  }
+}
