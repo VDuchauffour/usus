@@ -68,6 +68,27 @@ impl Config {
     }
 }
 
+const CONFIG_SCHEMA: &str = include_str!("../schema/config.schema.json");
+
+fn validate_against_schema(value: &Value) -> Result<()> {
+    let schema: Value =
+        serde_json::from_str(CONFIG_SCHEMA).expect("embedded config schema is valid JSON");
+    let validator = jsonschema::draft7::options()
+        .build(&schema)
+        .expect("embedded config schema is a valid JSON Schema");
+
+    let errors: Vec<String> = validator
+        .iter_errors(value)
+        .map(|error| format!("  - {} (at `{}`)", error, error.instance_path()))
+        .collect();
+
+    if !errors.is_empty() {
+        bail!("config file does not match schema:\n{}", errors.join("\n"));
+    }
+
+    Ok(())
+}
+
 pub fn config_dir() -> Result<PathBuf> {
     let home =
         dirs::home_dir().ok_or_else(|| anyhow::anyhow!("Could not determine home directory"))?;
@@ -86,7 +107,9 @@ pub fn load() -> Result<Config> {
     }
     let raw = fs::read_to_string(&path)
         .with_context(|| format!("Reading config at {}", path.display()))?;
-    let cfg: Config = toml::from_str(&raw).context("Parsing config TOML")?;
+    let value: Value = toml::from_str(&raw).context("Parsing config TOML")?;
+    validate_against_schema(&value)?;
+    let cfg: Config = serde_json::from_value(value).context("Parsing config TOML")?;
     cfg.validate()?;
     Ok(cfg)
 }
@@ -113,6 +136,99 @@ pub fn save(cfg: &Config) -> Result<()> {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn embedded_schema_is_valid_json_schema() {
+        let schema: Value = serde_json::from_str(CONFIG_SCHEMA).unwrap();
+        assert!(jsonschema::meta::is_valid(&schema));
+    }
+
+    #[test]
+    fn schema_accepts_valid_config() {
+        let raw = r#"
+default_provider = "anthropic"
+sub_day = 5
+
+[providers.anthropic]
+admin_key = "sk-ant-admin-x"
+allowance = 200.0
+
+[providers."opencode-go"]
+auth_cookie = "Fe26.2**x"
+workspace_id = "w"
+server_id = "s"
+function_id = 31
+"#;
+        let value: Value = toml::from_str(raw).unwrap();
+        validate_against_schema(&value).unwrap();
+    }
+
+    #[test]
+    fn schema_rejects_unknown_top_level_key() {
+        let value: Value = toml::from_str("sub_day = 5\nmystery_field = 42").unwrap();
+        assert!(validate_against_schema(&value).is_err());
+    }
+
+    #[test]
+    fn schema_rejects_unknown_provider_id() {
+        let raw = r#"
+sub_day = 5
+
+[providers."unknown-provider"]
+foo = "bar"
+"#;
+        let value: Value = toml::from_str(raw).unwrap();
+        assert!(validate_against_schema(&value).is_err());
+    }
+
+    #[test]
+    fn schema_rejects_sub_day_out_of_range() {
+        let value: Value = toml::from_str("sub_day = 0").unwrap();
+        let err = validate_against_schema(&value).unwrap_err().to_string();
+        assert!(err.contains("schema"), "unexpected error: {err}");
+        assert!(err.contains("sub_day"), "unexpected error: {err}");
+    }
+
+    #[test]
+    fn schema_rejects_missing_required_provider_field() {
+        let raw = r#"
+[providers."opencode-go"]
+auth_cookie = "Fe26.2**x"
+"#;
+        let value: Value = toml::from_str(raw).unwrap();
+        assert!(validate_against_schema(&value).is_err());
+    }
+
+    #[test]
+    fn schema_rejects_unknown_provider_field() {
+        let raw = r#"
+[providers.anthropic]
+admin_key = "sk-ant-admin-x"
+allowance = 200.0
+typo_field = "oops"
+"#;
+        let value: Value = toml::from_str(raw).unwrap();
+        assert!(validate_against_schema(&value).is_err());
+    }
+
+    #[test]
+    fn schema_rejects_wrong_type_for_function_id() {
+        let raw = r#"
+[providers."opencode-go"]
+auth_cookie = "Fe26.2**x"
+workspace_id = "w"
+server_id = "s"
+function_id = "not-an-integer"
+"#;
+        let value: Value = toml::from_str(raw).unwrap();
+        assert!(validate_against_schema(&value).is_err());
+    }
+
+    #[test]
+    fn schema_accepts_empty_config() {
+        let value: Value = toml::from_str("").unwrap();
+        validate_against_schema(&value).unwrap();
+    }
 
     #[test]
     fn reads_namespaced_toml_config() {
