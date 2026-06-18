@@ -4,7 +4,7 @@ use dialoguer::Input;
 use serde_json::Value;
 
 use crate::cli::command::LoginProvider;
-use crate::cli::prompt::{prompt_number, prompt_string, prompt_sub_day};
+use crate::cli::render::{prompt_number, prompt_string, prompt_sub_day};
 use crate::config::{config_path, load_or_default, save};
 use crate::providers::{anthropic, opencode_go};
 

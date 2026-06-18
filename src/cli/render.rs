@@ -1,8 +1,22 @@
 use std::fmt::{Debug, Display};
 use std::str::FromStr;
+use std::time::Duration;
 
 use anyhow::Result;
 use dialoguer::Input;
+use indicatif::{ProgressBar, ProgressStyle};
+
+pub fn get_spinner(message: &'static str) -> ProgressBar {
+    let spinner = ProgressBar::new_spinner();
+    spinner.set_style(
+        ProgressStyle::with_template("{spinner} {msg}")
+            .unwrap()
+            .tick_chars("⠋⠙⠹⠸⠼⠴⠦⠧⠇⠏ "),
+    );
+    spinner.set_message(message);
+    spinner.enable_steady_tick(Duration::from_millis(80));
+    spinner
+}
 
 pub fn prompt_string(value: Option<String>, prompt: &str, default: &str) -> Result<String> {
     match value {
