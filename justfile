@@ -1,6 +1,9 @@
 _default:
     @just --list
 
+pre-commit-install:
+    uvx pre-commit install
+
 build:
     cargo build
 
