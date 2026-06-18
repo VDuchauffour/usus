@@ -22,50 +22,38 @@ pub fn cargo_styles() -> Styles {
 #[command(name = "usus", version, about = "Your best partner for AI harnesses",styles = cargo_styles())]
 pub struct Cli {
     #[command(subcommand)]
-    pub command: Command,
+    pub command: Option<Command>,
 }
 
+/// Top-level provider selector. The action (report/login) is nested and
+/// optional, defaulting to `report` when omitted.
 #[derive(Subcommand)]
 pub enum Command {
-    /// Configure a provider (OpenCode GO, Anthropic, ...)
-    Login {
+    /// Use the OpenCode GO provider
+    #[command(name = "opencode-go")]
+    OpencodeGo {
         #[command(subcommand)]
-        provider: LoginProvider,
+        action: Option<OpencodeGoAction>,
     },
-    /// Fetch and display current usage
-    Report {
-        /// Provider id to query; fallback to the configured default
-        #[arg(long, short)]
-        provider: Option<String>,
+    /// Use the Anthropic Admin API provider
+    Anthropic {
+        #[command(subcommand)]
+        action: Option<AnthropicAction>,
     },
 }
 
 #[derive(Subcommand)]
-pub enum LoginProvider {
-    /// Configure the OpenCode GO provider
-    #[command(name = "opencode-go")]
-    OpencodeGo {
-        #[arg(long, short)]
-        workspace_id: Option<String>,
+pub enum OpencodeGoAction {
+    /// Fetch and display current usage (default when no action is given)
+    Report,
+    /// Configure this provider
+    Login,
+}
 
-        #[arg(long, short)]
-        server_id: Option<String>,
-
-        #[arg(long, short)]
-        function_id: Option<i64>,
-
-        #[arg(long, value_parser = clap::value_parser!(u32).range(1..=31))]
-        sub_day: Option<u32>,
-    },
-    /// Configure the Anthropic Admin API provider
-    Anthropic {
-        #[arg(long)]
-        admin_key: Option<String>,
-
-        #[arg(long)]
-        allowance: Option<f64>,
-
-        #[arg(long, value_parser = clap::value_parser!(u32).range(1..=31))]
-        sub_day: Option<u32>,
-    },
+#[derive(Subcommand)]
+pub enum AnthropicAction {
+    /// Fetch and display current usage (default when no action is given)
+    Report,
+    /// Configure this provider
+    Login,
 }

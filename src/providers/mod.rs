@@ -24,6 +24,7 @@ pub trait Provider {
     fn id(&self) -> &'static str;
     fn display_name(&self) -> &'static str;
     fn fetch_report(&self, cfg: &Value, period: &BillingPeriod) -> Result<ReportView>;
+    fn login(&self) -> Result<Value>;
 }
 
 pub fn by_id(id: &str) -> Option<Box<dyn Provider>> {

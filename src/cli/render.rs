@@ -3,8 +3,14 @@ use std::str::FromStr;
 use std::time::Duration;
 
 use anyhow::Result;
+use console::style;
 use dialoguer::Input;
 use indicatif::{ProgressBar, ProgressStyle};
+
+pub fn initial_login_message(header: &str, description: &str) {
+    println!("{}\n", style(header).bold());
+    println!(r#"{}"#, description);
+}
 
 pub fn get_spinner(message: &'static str) -> ProgressBar {
     let spinner = ProgressBar::new_spinner();
@@ -18,28 +24,22 @@ pub fn get_spinner(message: &'static str) -> ProgressBar {
     spinner
 }
 
-pub fn prompt_string(value: Option<String>, prompt: &str, default: &str) -> Result<String> {
-    match value {
-        Some(v) => Ok(v),
-        None => Ok(Input::new()
-            .with_prompt(prompt)
-            .default(default.to_string())
-            .interact_text()?),
-    }
+pub fn prompt_string(prompt: &str, default: &str) -> Result<String> {
+    Ok(Input::new()
+        .with_prompt(prompt)
+        .default(default.to_string())
+        .interact_text()?)
 }
 
-pub fn prompt_number<T>(value: Option<T>, prompt: &str, default: T) -> Result<T>
+pub fn prompt_number<T>(prompt: &str, default: T) -> Result<T>
 where
     T: Clone + ToString + FromStr,
     <T as FromStr>::Err: Display + Debug,
 {
-    match value {
-        Some(v) => Ok(v),
-        None => Ok(Input::<T>::new()
-            .with_prompt(prompt)
-            .default(default)
-            .interact_text()?),
-    }
+    Ok(Input::<T>::new()
+        .with_prompt(prompt)
+        .default(default)
+        .interact_text()?)
 }
 
 pub fn prompt_sub_day() -> Result<u32> {
