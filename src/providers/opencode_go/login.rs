@@ -2,8 +2,8 @@ use anyhow::{Result, bail};
 use dialoguer::Input;
 use serde_json::Value;
 
-use crate::cli::render::{initial_login_message, prompt_number, prompt_string};
 use crate::providers::opencode_go::Config;
+use crate::ui::prompt::{initial_login_message, prompt_number, prompt_string};
 
 pub fn run() -> Result<Value> {
     initial_login_message(

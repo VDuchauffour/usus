@@ -2,9 +2,9 @@ use anyhow::{Result, anyhow};
 use console::style;
 use serde_json::Value;
 
-use crate::cli::render::prompt_sub_day;
 use crate::config::{config_path, load_or_default, save};
 use crate::providers::by_id;
+use crate::ui::prompt::prompt_sub_day;
 
 pub fn run(provider_id: &str) -> Result<()> {
     let provider =

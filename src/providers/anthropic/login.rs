@@ -2,8 +2,8 @@ use anyhow::{Result, bail};
 use dialoguer::Input;
 use serde_json::Value;
 
-use crate::cli::render::{initial_login_message, prompt_number};
 use crate::providers::anthropic::{Config, DEFAULT_ALLOWANCE};
+use crate::ui::prompt::{initial_login_message, prompt_number};
 
 pub fn run() -> Result<Value> {
     initial_login_message(
