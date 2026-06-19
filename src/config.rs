@@ -47,7 +47,7 @@ impl Config {
                 return Ok(id.to_string());
             }
             let prog = env::args().next().unwrap_or_else(|| "usus".into());
-            bail!("Provider '{id}' is not configured. Run '{prog} login {id}' first.");
+            bail!("Provider '{id}' is not configured. Run '{prog} {id} login' first.");
         }
         if !self.default_provider.is_empty() && self.providers.contains_key(&self.default_provider)
         {
@@ -57,8 +57,9 @@ impl Config {
             return Ok(self.providers.keys().next().unwrap().clone());
         }
         let configured: Vec<String> = self.providers.keys().cloned().collect();
+        let prog = env::args().next().unwrap_or_else(|| "usus".into());
         bail!(
-            "No default provider configured. Pass --provider <id>. Configured: {}",
+            "No default provider configured. Run '{prog} <provider>' or set 'default_provider' in the config. Configured: {}",
             if configured.is_empty() {
                 "none".to_string()
             } else {
@@ -103,7 +104,7 @@ pub fn load() -> Result<Config> {
     let path = config_path()?;
     if !path.exists() {
         let prog = env::args().next().unwrap_or_else(|| "usus".into());
-        bail!("Configuration not found. Run '{prog} login <provider>' first.");
+        bail!("Configuration not found. Run '{prog} <provider> login' first.");
     }
     let raw = fs::read_to_string(&path)
         .with_context(|| format!("Reading config at {}", path.display()))?;

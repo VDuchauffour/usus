@@ -10,6 +10,7 @@ use crate::{
 };
 
 pub mod http;
+pub mod login;
 pub mod parser;
 
 pub const ID: &str = "opencode-go";
@@ -40,6 +41,10 @@ impl Provider for OpenCodeGo {
 
     fn display_name(&self) -> &'static str {
         "OpenCode GO"
+    }
+
+    fn login(&self) -> Result<Value> {
+        login::run()
     }
 
     fn fetch_report(&self, cfg: &Value, period: &BillingPeriod) -> Result<ReportView> {

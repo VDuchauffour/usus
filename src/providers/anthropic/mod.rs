@@ -9,6 +9,8 @@ use crate::{
     providers::{Provider, ReportView},
 };
 
+pub mod login;
+
 pub const ID: &str = "anthropic";
 
 const ADMIN_API_BASE: &str = "https://api.anthropic.com/v1/organizations";
@@ -45,6 +47,10 @@ impl Provider for Anthropic {
 
     fn display_name(&self) -> &'static str {
         "Anthropic API"
+    }
+
+    fn login(&self) -> Result<Value> {
+        login::run()
     }
 
     fn fetch_report(&self, cfg: &Value, period: &BillingPeriod) -> Result<ReportView> {

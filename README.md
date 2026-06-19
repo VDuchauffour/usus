@@ -11,11 +11,13 @@ cargo install usus
 ## Usage
 
 ```text
-Usage: usus <COMMAND>
+Usage: usus [PROVIDER] [ACTION]
 
 Commands:
-  login   Configure a provider
-  report  Fetch and display current usage
+  opencode-go  Use the OpenCode GO provider
+  anthropic    Use the Anthropic Admin API provider
+
+Omit the provider to use the configured default. Omit the action to run `report`.
 ```
 
 ## Providers
@@ -23,7 +25,7 @@ Commands:
 ### OpenCode GO
 
 ```sh
-usus login opencode-go
+usus opencode-go login
 ```
 
 You will be prompted for:
@@ -35,7 +37,7 @@ You will be prompted for:
 ### Anthropic
 
 ```sh
-usus login anthropic
+usus anthropic login
 ```
 
 You will be prompted for:
@@ -62,7 +64,7 @@ server_id = "15702f3a12ff8bff..."
 function_id = 31
 ```
 
-- `default_provider` — the provider used when `--provider` is omitted
+- `default_provider` — the provider used when no provider is given on the command line
 - `sub_day` — day of the month the billing cycle starts (1–31)
 
 ## Development

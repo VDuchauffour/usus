@@ -1,12 +1,19 @@
 use anyhow::Result;
 use clap::Parser;
 use console::style;
-use usus::cli::command::{Cli, Command, login, report};
+use usus::cli::command::{AnthropicAction, Cli, Command, OpencodeGoAction, login, report};
 
 pub fn run(cli: Cli) -> Result<()> {
     match cli.command {
-        Command::Login { provider } => login::run(provider),
-        Command::Report { provider } => report::run(provider.as_deref()),
+        Some(Command::OpencodeGo { action }) => match action {
+            Some(OpencodeGoAction::Login) => login::run("opencode-go"),
+            Some(OpencodeGoAction::Report) | None => report::run(Some("opencode-go")),
+        },
+        Some(Command::Anthropic { action }) => match action {
+            Some(AnthropicAction::Login) => login::run("anthropic"),
+            Some(AnthropicAction::Report) | None => report::run(Some("anthropic")),
+        },
+        None => report::run(None),
     }
 }
 
