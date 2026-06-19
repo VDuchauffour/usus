@@ -2,7 +2,7 @@
 name = "usus"
 version = "0.0.2"
 edition = "2024"
-description = "Your best partner for AI harnesses"
+description = "A CLI that reports AI inference usage against your allowance"
 license = "MIT"
 
 [dependencies]

@@ -1,6 +1,6 @@
 # usus
 
-A small Rust CLI to track your AI usage. See how much of your inference allowance has been used, and by whom.
+A Rust CLI that reports AI inference usage against your allowance.
 
 ## Install
 
@@ -76,8 +76,6 @@ just pre-commit-install
 ```
 
 > **Note:** This requires [`uv`](https://github.com/astral-sh/uv) to be installed, as the hooks are run via `uvx pre-commit`.
-
-Common tasks:
 
 Common tasks via [`just`](https://github.com/casey/just):
 
