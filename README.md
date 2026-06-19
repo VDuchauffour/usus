@@ -16,34 +16,9 @@ Usage: usus [PROVIDER] [ACTION]
 Commands:
   opencode-go  Use the OpenCode GO provider
   anthropic    Use the Anthropic Admin API provider
+```
 
 Omit the provider to use the configured default. Omit the action to run `report`.
-```
-
-## Providers
-
-### OpenCode GO
-
-```sh
-usus opencode-go login
-```
-
-You will be prompted for:
-
-- **Auth cookie** — from DevTools → Application → Cookies → `https://opencode.ai` (starts with `Fe26.2**`)
-- **Workspace ID**, **Server ID**, and **Function ID** — pre-filled with sensible defaults
-- **Billing cycle start day** — the day of the month your subscription renews
-
-### Anthropic
-
-```sh
-usus anthropic login
-```
-
-You will be prompted for:
-
-- **Admin API key** — from [console.anthropic.com/settings/admin-keys](https://console.anthropic.com/settings/admin-keys) (starts with `sk-ant-admin01-...`)
-- **Monthly allowance** — defaults to `$200.00`
 
 ## Configuration
 
