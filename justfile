@@ -49,3 +49,6 @@ clean:
 
 update:
     cargo update
+
+bump level="patch":
+    cargo bump {{level}}
