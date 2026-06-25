@@ -7,13 +7,16 @@ pub fn run(cli: Cli) -> Result<()> {
     match cli.command {
         Some(Command::OpencodeGo { action }) => match action {
             Some(OpencodeGoAction::Login) => login::run("opencode-go"),
-            Some(OpencodeGoAction::Report) | None => report::run(Some("opencode-go")),
+            Some(OpencodeGoAction::Report { per_keys }) => {
+                report::run(Some("opencode-go"), per_keys)
+            }
+            None => report::run(Some("opencode-go"), false),
         },
         Some(Command::Anthropic { action }) => match action {
             Some(AnthropicAction::Login) => login::run("anthropic"),
-            Some(AnthropicAction::Report) | None => report::run(Some("anthropic")),
+            Some(AnthropicAction::Report) | None => report::run(Some("anthropic"), false),
         },
-        None => report::run(None),
+        None => report::run(None, false),
     }
 }
 

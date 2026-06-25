@@ -6,12 +6,13 @@ use serde_json::Value;
 
 use crate::{
     billing::BillingPeriod,
-    providers::{Provider, ReportView},
+    providers::{Provider, ReportView, RollingUsageView},
 };
 
 pub mod http;
 pub mod login;
 pub mod parser;
+pub mod rolling;
 
 pub const ID: &str = "opencode-go";
 
@@ -84,6 +85,19 @@ impl Provider for OpenCodeGo {
             rows,
             total_cost,
         })
+    }
+
+    fn fetch_rolling_usage(&self, cfg: &Value) -> Result<Option<RollingUsageView>> {
+        let cfg: Config =
+            serde_json::from_value(cfg.clone()).context("Parsing opencode-go config")?;
+        let client = reqwest::blocking::Client::builder()
+            .build()
+            .context("Building HTTP client")?;
+        let text = http::fetch_go_page(&client, &cfg)?;
+        Ok(Some(rolling::parse_rolling_usage(
+            self.display_name(),
+            &text,
+        )?))
     }
 }
 

@@ -11,7 +11,7 @@ use ratatui::{
     widgets::Paragraph,
 };
 
-use crate::providers::ReportView;
+use crate::providers::{ReportView, RollingUsageView};
 
 const PANEL_WIDTH: usize = 52;
 
@@ -161,6 +161,10 @@ pub fn render(view: &ReportView) -> Result<()> {
 
     lines.push(Line::raw(""));
 
+    draw_lines(lines)
+}
+
+fn draw_lines(lines: Vec<Line>) -> Result<()> {
     let backend = CrosstermBackend::new(io::stdout());
     let height = lines.len() as u16;
     let mut terminal = Terminal::with_options(
@@ -175,4 +179,79 @@ pub fn render(view: &ReportView) -> Result<()> {
     })?;
 
     Ok(())
+}
+
+fn bar_color(pct: f64) -> Color {
+    if pct > 80.0 {
+        Color::Red
+    } else if pct > 50.0 {
+        Color::Yellow
+    } else {
+        Color::Green
+    }
+}
+
+fn format_reset(secs: i64) -> String {
+    if secs <= 0 {
+        return "now".to_string();
+    }
+    let days = secs / 86_400;
+    let hours = (secs % 86_400) / 3_600;
+    let mins = (secs % 3_600) / 60;
+    if days > 0 {
+        format!("{days}d {hours}h")
+    } else if hours > 0 {
+        format!("{hours}h {mins}m")
+    } else {
+        format!("{mins}m")
+    }
+}
+
+pub fn render_rolling(view: &RollingUsageView) -> Result<()> {
+    let hr: String = "─".repeat(PANEL_WIDTH);
+    let mut lines: Vec<Line> = vec![
+        Line::raw(""),
+        Line::from(vec![Span::styled(
+            format!("  {}", view.title),
+            Style::default()
+                .fg(Color::Cyan)
+                .add_modifier(Modifier::BOLD),
+        )]),
+        Line::from(vec![Span::styled(
+            format!("  {hr}"),
+            Style::default().dim(),
+        )]),
+    ];
+
+    let bar_w = PANEL_WIDTH - 7;
+    for window in &view.windows {
+        let pct = window.percent.clamp(0.0, 100.0);
+        let filled = (((pct / 100.0) * bar_w as f64).round() as usize).min(bar_w);
+        let empty = bar_w - filled;
+        let pct_label = pad_left(&format!("{pct:.1}%"), 6);
+        let reset = format!("resets in {}", format_reset(window.reset_in_sec));
+
+        let head_pad = PANEL_WIDTH
+            .saturating_sub(window.label.chars().count() + reset.chars().count())
+            .max(1);
+
+        lines.push(Line::from(vec![
+            Span::styled(
+                format!("  {}", window.label),
+                Style::default().add_modifier(Modifier::BOLD),
+            ),
+            Span::raw(" ".repeat(head_pad)),
+            Span::styled(reset, Style::default().dim()),
+        ]));
+        lines.push(Line::from(vec![
+            Span::raw("  "),
+            Span::styled("█".repeat(filled), Style::default().fg(bar_color(pct))),
+            Span::styled("░".repeat(empty), Style::default().dim()),
+            Span::raw(format!(" {pct_label}")),
+        ]));
+    }
+
+    lines.push(Line::raw(""));
+
+    draw_lines(lines)
 }
