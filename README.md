@@ -73,4 +73,4 @@ A [dev container](.devcontainer/devcontainer.json) is provided.
 
 ## Acknowledgments
 
-- Initial inspiration from [jR4dh3y's opencode-usage](https://github.com/jR4dh3y/opencode-usage)
+- Initial inspiration from [jR4dh3y's opencode-go-usage](https://github.com/jR4dh3y/opencode-go-usage)
