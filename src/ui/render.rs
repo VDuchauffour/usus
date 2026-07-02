@@ -125,16 +125,16 @@ pub fn render(view: &ReportView) -> Result<()> {
             Style::default().dim(),
         )]),
         Line::from(vec![
-            Span::raw("  "),
-            Span::styled("█".repeat(filled), Style::default().fg(bar_color)),
-            Span::styled("░".repeat(empty), Style::default().dim()),
-            Span::raw(format!(" {pct_label}")),
-        ]),
-        Line::from(vec![
             Span::raw("  ".to_string()),
             Span::styled(used_str, Style::default().add_modifier(Modifier::BOLD)),
             Span::raw(c_pad),
             Span::styled(rem_str, Style::default().fg(Color::Green)),
+        ]),
+        Line::from(vec![
+            Span::raw("  "),
+            Span::styled("█".repeat(filled), Style::default().fg(bar_color)),
+            Span::styled("░".repeat(empty), Style::default().dim()),
+            Span::raw(format!(" {pct_label}")),
         ]),
         Line::from(vec![Span::styled(
             format!("  {hr}"),
