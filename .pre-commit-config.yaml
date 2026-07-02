@@ -53,3 +53,5 @@ repos:
         entry: just ci-fix
         language: system
         pass_filenames: false
+        stages:
+          - pre-push
