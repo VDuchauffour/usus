@@ -39,7 +39,7 @@
             }
           }
         },
-        "opencode-go": {
+        "opencode": {
           "type": "object",
           "description": "OpenCode GO provider settings.",
           "additionalProperties": false,

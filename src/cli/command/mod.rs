@@ -30,7 +30,7 @@ pub struct Cli {
 #[derive(Subcommand)]
 pub enum Command {
     /// Use the OpenCode GO provider
-    #[command(name = "opencode-go")]
+    #[command(name = "opencode")]
     OpencodeGo {
         #[command(subcommand)]
         action: Option<OpencodeGoAction>,

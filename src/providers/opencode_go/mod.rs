@@ -14,7 +14,7 @@ pub mod login;
 pub mod parser;
 pub mod rolling;
 
-pub const ID: &str = "opencode-go";
+pub const ID: &str = "opencode";
 
 const ALLOWANCE: f64 = 60.0;
 const COST_DIVISOR: f64 = 100_000_000.0;
@@ -29,7 +29,7 @@ pub struct Config {
 }
 
 pub fn validate(blob: &Value) -> Result<()> {
-    let _: Config = serde_json::from_value(blob.clone()).context("opencode-go provider config")?;
+    let _: Config = serde_json::from_value(blob.clone()).context("opencode provider config")?;
     Ok(())
 }
 
@@ -49,8 +49,7 @@ impl Provider for OpenCodeGo {
     }
 
     fn fetch_report(&self, cfg: &Value, period: &BillingPeriod) -> Result<ReportView> {
-        let cfg: Config =
-            serde_json::from_value(cfg.clone()).context("Parsing opencode-go config")?;
+        let cfg: Config = serde_json::from_value(cfg.clone()).context("Parsing opencode config")?;
         let client = reqwest::blocking::Client::builder()
             .build()
             .context("Building HTTP client")?;
@@ -88,8 +87,7 @@ impl Provider for OpenCodeGo {
     }
 
     fn fetch_rolling_usage(&self, cfg: &Value) -> Result<Option<RollingUsageView>> {
-        let cfg: Config =
-            serde_json::from_value(cfg.clone()).context("Parsing opencode-go config")?;
+        let cfg: Config = serde_json::from_value(cfg.clone()).context("Parsing opencode config")?;
         let client = reqwest::blocking::Client::builder()
             .build()
             .context("Building HTTP client")?;

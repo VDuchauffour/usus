@@ -72,7 +72,7 @@ fn parse(text: &str) -> Result<RollingUsage> {
             monthly: extract_window(text, "monthlyUsage"),
         }),
         _ if looks_signed_out(text) => {
-            bail!("OpenCode GO session cookie is invalid or expired. Run 'usus opencode-go login'.")
+            bail!("OpenCode GO session cookie is invalid or expired. Run 'usus opencode login'.")
         }
         _ => bail!("Could not find rolling usage data in the OpenCode GO response."),
     }
