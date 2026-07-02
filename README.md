@@ -20,6 +20,14 @@ Commands:
 
 Omit the provider to use the configured default. Omit the action to run `report`.
 
+For `opencode-go`, `report` shows the rolling subscription usage (5-hour, weekly,
+and monthly windows) by default. Pass `--per-keys` to show the per-key cost
+breakdown instead:
+
+```sh
+usus opencode-go report --per-keys
+```
+
 ## Configuration
 
 Config lives at `~/.config/usus/config.toml`. Example:

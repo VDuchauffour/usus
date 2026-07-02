@@ -45,7 +45,11 @@ pub enum Command {
 #[derive(Subcommand)]
 pub enum OpencodeGoAction {
     /// Fetch and display current usage (default when no action is given)
-    Report,
+    Report {
+        /// Show the per-key cost breakdown instead of rolling usage
+        #[arg(long)]
+        per_keys: bool,
+    },
     /// Configure this provider
     Login,
 }
