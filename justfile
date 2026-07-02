@@ -7,6 +7,7 @@ default:
 
 pre-commit-install:
     uvx pre-commit install
+    uvx pre-commit install --hook-type pre-push
 
 build:
     cargo build
