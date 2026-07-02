@@ -14,18 +14,18 @@ cargo install usus
 Usage: usus [PROVIDER] [ACTION]
 
 Commands:
-  opencode-go  Use the OpenCode GO provider
+  opencode  Use the OpenCode GO provider
   anthropic    Use the Anthropic Admin API provider
 ```
 
 Omit the provider to use the configured default. Omit the action to run `report`.
 
-For `opencode-go`, `report` shows the rolling subscription usage (5-hour, weekly,
+For `opencode`, `report` shows the rolling subscription usage (5-hour, weekly,
 and monthly windows) by default. Pass `--per-keys` to show the per-key cost
 breakdown instead:
 
 ```sh
-usus opencode-go report --per-keys
+usus opencode report --per-keys
 ```
 
 ## Configuration
@@ -40,7 +40,7 @@ sub_day = 5
 admin_key = "sk-ant-admin01-..."
 allowance = 200.0
 
-[providers."opencode-go"]
+[providers."opencode"]
 auth_cookie = "Fe26.2**..."
 workspace_id = "wrk_01KDSXX2YK0SSF30AKBTQGWQM9"
 server_id = "15702f3a12ff8bff..."
@@ -73,4 +73,4 @@ A [dev container](.devcontainer/devcontainer.json) is provided.
 
 ## Acknowledgments
 
-- Initial inspiration from [jR4dh3y's opencode-go-usage](https://github.com/jR4dh3y/opencode-go-usage)
+- Initial inspiration from [jR4dh3y's opencode-usage](https://github.com/jR4dh3y/opencode-usage)

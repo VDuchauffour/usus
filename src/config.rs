@@ -154,7 +154,7 @@ sub_day = 5
 admin_key = "sk-ant-admin-x"
 allowance = 200.0
 
-[providers."opencode-go"]
+[providers."opencode"]
 auth_cookie = "Fe26.2**x"
 workspace_id = "w"
 server_id = "s"
@@ -193,7 +193,7 @@ foo = "bar"
     #[test]
     fn schema_rejects_missing_required_provider_field() {
         let raw = r#"
-[providers."opencode-go"]
+[providers."opencode"]
 auth_cookie = "Fe26.2**x"
 "#;
         let value: Value = toml::from_str(raw).unwrap();
@@ -215,7 +215,7 @@ typo_field = "oops"
     #[test]
     fn schema_rejects_wrong_type_for_function_id() {
         let raw = r#"
-[providers."opencode-go"]
+[providers."opencode"]
 auth_cookie = "Fe26.2**x"
 workspace_id = "w"
 server_id = "s"
@@ -241,7 +241,7 @@ sub_day = 5
 admin_key = "sk-ant-admin-x"
 allowance = 200.0
 
-[providers."opencode-go"]
+[providers."opencode"]
 auth_cookie = "x"
 workspace_id = "w"
 server_id = "s"
@@ -310,7 +310,7 @@ foo = "bar"
         let raw = r#"
 sub_day = 5
 
-[providers."opencode-go"]
+[providers."opencode"]
 auth_cookie = "x"
 "#;
         let cfg: Config = toml::from_str(raw).unwrap();
@@ -341,9 +341,9 @@ typo_field = "oops"
     #[test]
     fn pick_provider_respects_explicit_flag() {
         let mut cfg = Config::default();
-        cfg.providers.insert("opencode-go".to_string(), Value::Null);
+        cfg.providers.insert("opencode".to_string(), Value::Null);
         cfg.providers.insert("anthropic".to_string(), Value::Null);
-        cfg.default_provider = "opencode-go".to_string();
+        cfg.default_provider = "opencode".to_string();
         assert_eq!(
             cfg.pick_provider_id(Some("anthropic")).unwrap(),
             "anthropic"
