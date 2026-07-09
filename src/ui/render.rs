@@ -65,6 +65,16 @@ fn pad_left(s: &str, width: usize) -> String {
     }
 }
 
+fn format_cost(currency: &str, value: f64) -> String {
+    let s = format!("{value:.2}");
+    match s.find('.') {
+        Some(dot) if s[dot + 1..].bytes().all(|b| b == b'0') => {
+            format!("{currency}{}", &s[..dot])
+        }
+        _ => format!("{currency}{s}"),
+    }
+}
+
 pub fn render(view: &ReportView) -> Result<()> {
     let currency = view.currency;
     let allowance = view.allowance;
@@ -101,8 +111,12 @@ pub fn render(view: &ReportView) -> Result<()> {
         .max(1);
     let h_pad = " ".repeat(h_pad_len);
 
-    let used_str = format!("{currency}{total_cost:.2} / {currency}{allowance:.2}");
-    let rem_str = format!("{currency}{remaining:.2} remaining");
+    let used_str = format!(
+        "{} / {}",
+        format_cost(currency, total_cost),
+        format_cost(currency, allowance)
+    );
+    let rem_str = format!("{} remaining", format_cost(currency, remaining));
     let c_pad_len = PANEL_WIDTH
         .saturating_sub(used_str.chars().count() + rem_str.chars().count())
         .max(1);
@@ -145,7 +159,7 @@ pub fn render(view: &ReportView) -> Result<()> {
     for (name, cost) in &view.rows {
         let stripped = strip_email_prefix(name);
         let display = truncate_or_pad(&stripped, 32);
-        let cost_str = pad_left(&format!("{currency}{cost:.4}"), 10);
+        let cost_str = pad_left(&format_cost(currency, *cost), 10);
         let pct = if allowance > 0.0 {
             pad_left(&format!("{:.1}%", (cost / allowance) * 100.0), 6)
         } else {
@@ -254,4 +268,29 @@ pub fn render_rolling(view: &RollingUsageView) -> Result<()> {
     lines.push(Line::raw(""));
 
     draw_lines(lines)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn format_cost_drops_all_zero_decimals() {
+        assert_eq!(format_cost("$", 0.0), "$0");
+        assert_eq!(format_cost("$", 200.0), "$200");
+        assert_eq!(format_cost("$", 12.0), "$12");
+    }
+
+    #[test]
+    fn format_cost_keeps_nonzero_decimals() {
+        assert_eq!(format_cost("$", 12.5), "$12.50");
+        assert_eq!(format_cost("$", 12.129), "$12.13");
+        assert_eq!(format_cost("$", 12.99), "$12.99");
+    }
+
+    #[test]
+    fn format_cost_rounds_to_two_decimals_then_drops() {
+        assert_eq!(format_cost("$", 12.999), "$13");
+        assert_eq!(format_cost("$", 12.005), "$12.01");
+    }
 }
