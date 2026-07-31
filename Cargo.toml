@@ -4,6 +4,7 @@ version = "0.0.2"
 edition = "2024"
 description = "A CLI that reports AI inference usage against your allowance"
 license = "MIT"
+repository = "https://github.com/VDuchauffour/usus"
 
 [dependencies]
 anstream = "1.0.0"
