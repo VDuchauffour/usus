@@ -11,7 +11,7 @@ use ratatui::{
     widgets::Paragraph,
 };
 
-use crate::providers::RollingUsageView;
+use crate::providers::{RollingUsageView, UsageWindowView};
 
 const PANEL_WIDTH: usize = 52;
 
@@ -72,65 +72,91 @@ fn format_reset(secs: i64) -> String {
     }
 }
 
-pub fn render_rolling(view: &RollingUsageView) -> Result<()> {
-    let hr: String = "─".repeat(PANEL_WIDTH);
-    let renews_str = if view.renews.is_empty() {
+/// Build the right-aligned "Renews <date>" label, or empty when the provider
+/// exposes no renewal date.
+fn renews_label(renews: &str) -> String {
+    if renews.is_empty() {
         String::new()
     } else {
-        format!("Renews {}", view.renews)
-    };
-    let title = view.title.as_str();
-    let h_pad_len = PANEL_WIDTH
-        .saturating_sub(title.chars().count() + renews_str.chars().count())
-        .max(1);
-    let h_pad = " ".repeat(h_pad_len);
-    let mut lines: Vec<Line> = vec![
-        Line::raw(""),
-        Line::from(vec![
-            Span::styled(
-                format!("  {title}"),
-                Style::default()
-                    .fg(Color::Cyan)
-                    .add_modifier(Modifier::BOLD),
-            ),
-            Span::raw(h_pad),
-            Span::styled(renews_str, Style::default().dim()),
-        ]),
-        Line::from(vec![Span::styled(
-            format!("  {hr}"),
-            Style::default().dim(),
-        )]),
-    ];
-
-    let bar_w = PANEL_WIDTH - 7;
-    for window in &view.windows {
-        let pct = window.percent.clamp(0.0, 100.0);
-        let filled = (((pct / 100.0) * bar_w as f64).round() as usize).min(bar_w);
-        let empty = bar_w - filled;
-        let pct_label = pad_left(&format!("{pct:.1}%"), 6);
-        let reset = format!("resets in {}", format_reset(window.reset_in_sec));
-
-        let head_pad = PANEL_WIDTH
-            .saturating_sub(window.label.chars().count() + reset.chars().count())
-            .max(1);
-
-        lines.push(Line::from(vec![
-            Span::styled(
-                format!("  {}", window.label),
-                Style::default().add_modifier(Modifier::BOLD),
-            ),
-            Span::raw(" ".repeat(head_pad)),
-            Span::styled(reset, Style::default().dim()),
-        ]));
-        lines.push(Line::from(vec![
-            Span::raw("  "),
-            Span::styled("█".repeat(filled), Style::default().fg(bar_color(pct))),
-            Span::styled("░".repeat(empty), Style::default().dim()),
-            Span::raw(format!(" {pct_label}")),
-        ]));
+        format!("Renews {renews}")
     }
+}
 
+/// Spaces needed between `left` and `right` so they sit on opposite ends of the
+/// panel width, always at least one space.
+fn gap_between(left: &str, right: &str) -> usize {
+    PANEL_WIDTH
+        .saturating_sub(left.chars().count() + right.chars().count())
+        .max(1)
+}
+
+/// Header row: provider name on the left (bold, cyan), optional renew date on
+/// the right (dim).
+fn header_line(view: &RollingUsageView) -> Line<'static> {
+    let title = view.title.as_str();
+    let renews = renews_label(&view.renews);
+    let gap = gap_between(title, &renews);
+    Line::from(vec![
+        Span::styled(
+            format!("  {title}"),
+            Style::default()
+                .fg(Color::Cyan)
+                .add_modifier(Modifier::BOLD),
+        ),
+        Span::raw(" ".repeat(gap)),
+        Span::styled(renews, Style::default().dim()),
+    ])
+}
+
+/// Separator row: a full-width dim horizontal rule under the header.
+fn separator_line() -> Line<'static> {
+    Line::from(vec![Span::styled(
+        format!("  {}", "─".repeat(PANEL_WIDTH)),
+        Style::default().dim(),
+    )])
+}
+
+/// One body entry's info row: window label on the left (bold), reset text on
+/// the right (dim).
+fn info_line(window: &UsageWindowView) -> Line<'static> {
+    let label = window.label;
+    let reset = format!("resets in {}", format_reset(window.reset_in_sec));
+    let gap = gap_between(label, &reset);
+    Line::from(vec![
+        Span::styled(
+            format!("  {label}"),
+            Style::default().add_modifier(Modifier::BOLD),
+        ),
+        Span::raw(" ".repeat(gap)),
+        Span::styled(reset, Style::default().dim()),
+    ])
+}
+
+/// One body entry's progress-bar row: filled glyphs colored by usage, empty
+/// glyphs dim, and a right-aligned percentage label.
+fn bar_line(window: &UsageWindowView) -> Line<'static> {
+    let pct = window.percent.clamp(0.0, 100.0);
+    let bar_w = PANEL_WIDTH - 7;
+    let filled = (((pct / 100.0) * bar_w as f64).round() as usize).min(bar_w);
+    let empty = bar_w - filled;
+    let pct_label = pad_left(&format!("{pct:.1}%"), 6);
+    Line::from(vec![
+        Span::raw("  "),
+        Span::styled("█".repeat(filled), Style::default().fg(bar_color(pct))),
+        Span::styled("░".repeat(empty), Style::default().dim()),
+        Span::raw(format!(" {pct_label}")),
+    ])
+}
+
+pub fn render_rolling(view: &RollingUsageView) -> Result<()> {
+    let mut lines: Vec<Line> = Vec::with_capacity(view.windows.len() * 2 + 4);
     lines.push(Line::raw(""));
-
+    lines.push(header_line(view));
+    lines.push(separator_line());
+    for window in &view.windows {
+        lines.push(info_line(window));
+        lines.push(bar_line(window));
+    }
+    lines.push(Line::raw(""));
     draw_lines(lines)
 }
