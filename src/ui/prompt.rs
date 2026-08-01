@@ -29,17 +29,3 @@ where
         .default(default)
         .interact_text()?)
 }
-
-pub fn prompt_sub_day() -> Result<u32> {
-    Ok(Input::<u32>::new()
-        .with_prompt("Billing cycle day")
-        .default(1)
-        .validate_with(|n: &u32| -> Result<(), &str> {
-            if (1..=31).contains(n) {
-                Ok(())
-            } else {
-                Err("Must be a number between 1 and 31.")
-            }
-        })
-        .interact_text()?)
-}

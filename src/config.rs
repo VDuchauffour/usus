@@ -12,16 +12,11 @@ pub struct Config {
     #[serde(default)]
     pub default_provider: String,
     #[serde(default)]
-    pub sub_day: u32,
-    #[serde(default)]
     pub providers: BTreeMap<String, Value>,
 }
 
 impl Config {
     pub fn validate(&self) -> Result<()> {
-        if !(0..=31).contains(&self.sub_day) {
-            bail!("sub_day must be between 0 and 31 (got {})", self.sub_day);
-        }
         if !self.default_provider.is_empty() && !self.providers.contains_key(&self.default_provider)
         {
             bail!(
@@ -158,7 +153,6 @@ mod tests {
     fn schema_accepts_valid_config() {
         let raw = r#"
 default_provider = "anthropic"
-sub_day = 5
 
 [providers.anthropic]
 
@@ -174,34 +168,18 @@ function_id = 31
 
     #[test]
     fn schema_rejects_unknown_top_level_key() {
-        let value: Value = toml::from_str("sub_day = 5\nmystery_field = 42").unwrap();
+        let value: Value = toml::from_str("mystery_field = 42").unwrap();
         assert!(validate_against_schema(&value).is_err());
     }
 
     #[test]
     fn schema_rejects_unknown_provider_id() {
         let raw = r#"
-sub_day = 5
-
 [providers."unknown-provider"]
 foo = "bar"
 "#;
         let value: Value = toml::from_str(raw).unwrap();
         assert!(validate_against_schema(&value).is_err());
-    }
-
-    #[test]
-    fn schema_rejects_sub_day_out_of_range() {
-        let value: Value = toml::from_str("sub_day = 32").unwrap();
-        let err = validate_against_schema(&value).unwrap_err().to_string();
-        assert!(err.contains("schema"), "unexpected error: {err}");
-        assert!(err.contains("sub_day"), "unexpected error: {err}");
-    }
-
-    #[test]
-    fn schema_accepts_sub_day_zero() {
-        let value: Value = toml::from_str("sub_day = 0").unwrap();
-        validate_against_schema(&value).unwrap();
     }
 
     #[test]
@@ -247,7 +225,6 @@ function_id = "not-an-integer"
     fn reads_namespaced_toml_config() {
         let raw = r#"
 default_provider = "anthropic"
-sub_day = 5
 
 [providers.anthropic]
 
@@ -259,7 +236,6 @@ function_id = 31
 "#;
         let cfg: Config = toml::from_str(raw).unwrap();
         assert_eq!(cfg.default_provider, "anthropic");
-        assert_eq!(cfg.sub_day, 5);
         assert_eq!(cfg.providers.len(), 2);
         cfg.validate().unwrap();
     }
@@ -268,7 +244,6 @@ function_id = 31
     fn deny_unknown_top_level_fields() {
         let raw = r#"
 default_provider = "anthropic"
-sub_day = 5
 mystery_field = 42
 providers = {}
 "#;
@@ -280,27 +255,8 @@ providers = {}
     }
 
     #[test]
-    fn validate_rejects_sub_day_out_of_range() {
-        let cfg = Config {
-            sub_day: 32,
-            ..Default::default()
-        };
-        assert!(cfg.validate().is_err());
-    }
-
-    #[test]
-    fn validate_accepts_sub_day_zero() {
-        let cfg = Config {
-            sub_day: 0,
-            ..Default::default()
-        };
-        assert!(cfg.validate().is_ok());
-    }
-
-    #[test]
     fn validate_rejects_default_not_in_providers() {
         let cfg = Config {
-            sub_day: 5,
             default_provider: "ghost".to_string(),
             ..Default::default()
         };
@@ -310,8 +266,6 @@ providers = {}
     #[test]
     fn validate_rejects_unknown_provider_id() {
         let raw = r#"
-sub_day = 5
-
 [providers."unknown-provider"]
 foo = "bar"
 "#;
@@ -322,8 +276,6 @@ foo = "bar"
     #[test]
     fn validate_rejects_bad_provider_blob_missing_field() {
         let raw = r#"
-sub_day = 5
-
 [providers."opencode"]
 auth_cookie = "x"
 "#;
@@ -334,8 +286,6 @@ auth_cookie = "x"
     #[test]
     fn validate_rejects_bad_provider_blob_unknown_field() {
         let raw = r#"
-sub_day = 5
-
 [providers.anthropic]
 typo_field = "oops"
 "#;

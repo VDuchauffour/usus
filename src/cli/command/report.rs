@@ -1,16 +1,11 @@
 // Report command - thin orchestrator. Provider does the work.
 
-use anyhow::{anyhow, bail, Result};
+use anyhow::{Result, anyhow};
 
 use crate::cli::render::get_spinner;
-use crate::{
-    billing::BillingPeriod,
-    config::load,
-    providers::ProviderId,
-    ui::render::{render, render_rolling},
-};
+use crate::{config::load, providers::ProviderId, ui::render::render_rolling};
 
-pub fn run(provider_flag: Option<ProviderId>, per_keys: bool) -> Result<()> {
+pub fn run(provider_flag: Option<ProviderId>) -> Result<()> {
     let cfg = load()?;
     let provider_id = cfg.pick_provider_id(provider_flag)?;
     let provider = provider_id.provider();
@@ -19,28 +14,12 @@ pub fn run(provider_flag: Option<ProviderId>, per_keys: bool) -> Result<()> {
         .get(provider_id.as_str())
         .ok_or_else(|| anyhow!("Provider '{provider_id}' not configured"))?;
 
-    if !per_keys {
-        let spinner = get_spinner("Fetching usage data...");
-        let rolling = provider.fetch_rolling_usage(provider_cfg);
-        spinner.finish_and_clear();
-        if let Some(view) = rolling? {
-            render_rolling(&view)?;
-            return Ok(());
-        }
-    }
-
-    if cfg.sub_day == 0 {
-        bail!(
-            "Billing cycle day (sub_day) is not configured. \
-             Run 'usus opencode login' to set it."
-        );
-    }
-    let period = BillingPeriod::current(cfg.sub_day);
     let spinner = get_spinner("Fetching usage data...");
-    let result = provider.fetch_report(provider_cfg, &period);
+    let rolling = provider.fetch_rolling_usage(provider_cfg);
     spinner.finish_and_clear();
 
-    let view = result?;
-    render(&view)?;
+    let view = rolling?
+        .ok_or_else(|| anyhow!("Provider '{provider_id}' does not support rolling usage"))?;
+    render_rolling(&view)?;
     Ok(())
 }

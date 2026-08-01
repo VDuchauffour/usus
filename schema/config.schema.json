@@ -10,12 +10,6 @@
       "type": "string",
       "description": "Provider id used when no provider is given on the command line. Must match a key in `providers` (empty means no default)."
     },
-    "sub_day": {
-      "type": "integer",
-      "description": "Day of the month the billing cycle starts. 0 means unset (not needed for Anthropic rolling usage).",
-      "minimum": 0,
-      "maximum": 31
-    },
     "providers": {
       "type": "object",
       "description": "Configured providers, keyed by provider id.",

@@ -3,10 +3,7 @@ use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 
-use crate::{
-    billing::BillingPeriod,
-    providers::{Provider, ProviderId, ReportView, RollingUsageView, UsageWindowView},
-};
+use crate::providers::{Provider, ProviderId, RollingUsageView, UsageWindowView};
 
 pub mod login;
 
@@ -47,13 +44,6 @@ impl Provider for Anthropic {
         login::run()
     }
 
-    fn fetch_report(&self, _cfg: &Value, _period: &BillingPeriod) -> Result<ReportView> {
-        bail!(
-            "Anthropic provider shows rolling usage only. \
-             Run 'usus anthropic' without --per-keys."
-        );
-    }
-
     fn fetch_rolling_usage(&self, _cfg: &Value) -> Result<Option<RollingUsageView>> {
         let token = read_oauth_token()?;
         let client = reqwest::blocking::Client::builder()
@@ -88,8 +78,8 @@ impl Provider for Anthropic {
 
 /// Read the OAuth access token from `~/.claude/.credentials.json`.
 fn read_oauth_token() -> Result<String> {
-    let home = dirs::home_dir()
-        .ok_or_else(|| anyhow::anyhow!("Could not determine home directory"))?;
+    let home =
+        dirs::home_dir().ok_or_else(|| anyhow::anyhow!("Could not determine home directory"))?;
     let path = home.join(CREDENTIALS_REL_PATH);
     if !path.exists() {
         bail!(
@@ -98,10 +88,10 @@ fn read_oauth_token() -> Result<String> {
             path.display()
         );
     }
-    let raw = std::fs::read_to_string(&path)
-        .with_context(|| format!("Reading {}", path.display()))?;
-    let parsed: Value = serde_json::from_str(&raw)
-        .with_context(|| format!("Parsing {}", path.display()))?;
+    let raw =
+        std::fs::read_to_string(&path).with_context(|| format!("Reading {}", path.display()))?;
+    let parsed: Value =
+        serde_json::from_str(&raw).with_context(|| format!("Parsing {}", path.display()))?;
     let token = parsed
         .get("claudeAiOauth")
         .and_then(|o| o.get("accessToken"))

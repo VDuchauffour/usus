@@ -1,6 +1,6 @@
 # usus
 
-A Rust CLI that reports AI inference usage against your allowance.
+A Rust CLI that reports AI inference usage.
 
 ## Install
 
@@ -24,13 +24,8 @@ Omit the provider to use the configured default. Omit the action to run `report`
 using the Claude Code OAuth credentials at `~/.claude/.credentials.json`. No API
 key required — just run `claude login` first.
 
-For `opencode`, `report` shows the rolling subscription usage (5-hour, weekly,
-and monthly windows) by default. Pass `--per-keys` to show the per-key cost
-breakdown instead:
-
-```sh
-usus opencode report --per-keys
-```
+`usus opencode` shows the rolling subscription usage (5-hour, weekly, and monthly
+windows).
 
 ## Configuration
 
@@ -38,7 +33,6 @@ Config lives at `~/.config/usus/config.toml`. Example:
 
 ```toml
 default_provider = "anthropic"
-sub_day = 5
 
 [providers.anthropic]
 
@@ -50,7 +44,6 @@ function_id = 31
 ```
 
 - `default_provider` — the provider used when no provider is given on the command line
-- `sub_day` — day of the month the billing cycle starts (1–31)
 - `[providers.anthropic]` — no fields needed; reads Claude Code OAuth credentials from `~/.claude/.credentials.json` (created by `claude login`)
 
 ## Development

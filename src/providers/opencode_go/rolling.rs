@@ -8,7 +8,7 @@
 // this skips the cost field exactly like the upstream regex `usagePercent`
 // lookahead does.
 
-use anyhow::{bail, Result};
+use anyhow::{Result, bail};
 
 use crate::providers::{RollingUsageView, UsageWindowView};
 
