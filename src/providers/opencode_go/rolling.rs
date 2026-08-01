@@ -92,16 +92,25 @@ pub fn parse_rolling_usage(title: &str, text: &str) -> Result<RollingUsageView> 
             reset_in_sec: usage.weekly.reset_in_sec,
         },
     ];
-    if let Some(monthly) = usage.monthly {
+    let mut monthly_reset: i64 = 0;
+    if let Some(monthly) = &usage.monthly {
         windows.push(UsageWindowView {
             label: "Monthly",
             percent: monthly.percent,
             reset_in_sec: monthly.reset_in_sec,
         });
+        monthly_reset = monthly.reset_in_sec;
     }
+    let renews = if monthly_reset > 0 {
+        let dt = chrono::Local::now() + chrono::Duration::seconds(monthly_reset);
+        dt.format("%d %b %Y").to_string()
+    } else {
+        String::new()
+    };
     Ok(RollingUsageView {
         title: title.to_string(),
         windows,
+        renews,
     })
 }
 
