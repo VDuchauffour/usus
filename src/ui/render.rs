@@ -40,6 +40,8 @@ fn draw_lines(lines: Vec<Line>) -> Result<()> {
         let paragraph = Paragraph::new(lines.clone());
         frame.render_widget(paragraph, frame.area());
     })?;
+    drop(terminal); // restore cursor before the trailing newline
+    println!(); // ensure stdout ends with \n so the shell doesn't print its % marker
 
     Ok(())
 }
