@@ -1,6 +1,6 @@
 [package]
 name = "usus"
-version = "0.0.2"
+version = "0.0.3"
 edition = "2024"
 description = "A CLI that reports AI inference usage against your allowance"
 license = "MIT"
