@@ -6,15 +6,13 @@ use serde_json::Value;
 
 use crate::{
     billing::BillingPeriod,
-    providers::{Provider, ReportView, RollingUsageView},
+    providers::{Provider, ProviderId, ReportView, RollingUsageView},
 };
 
 pub mod http;
 pub mod login;
 pub mod parser;
 pub mod rolling;
-
-pub const ID: &str = "opencode";
 
 const ALLOWANCE: f64 = 60.0;
 const COST_DIVISOR: f64 = 100_000_000.0;
@@ -36,8 +34,8 @@ pub fn validate(blob: &Value) -> Result<()> {
 pub struct OpenCodeGo;
 
 impl Provider for OpenCodeGo {
-    fn id(&self) -> &'static str {
-        ID
+    fn id(&self) -> ProviderId {
+        ProviderId::OpencodeGo
     }
 
     fn display_name(&self) -> &'static str {

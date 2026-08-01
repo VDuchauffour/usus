@@ -6,18 +6,17 @@ use crate::cli::render::get_spinner;
 use crate::{
     billing::BillingPeriod,
     config::load,
-    providers::by_id,
+    providers::ProviderId,
     ui::render::{render, render_rolling},
 };
 
-pub fn run(provider_flag: Option<&str>, per_keys: bool) -> Result<()> {
+pub fn run(provider_flag: Option<ProviderId>, per_keys: bool) -> Result<()> {
     let cfg = load()?;
     let provider_id = cfg.pick_provider_id(provider_flag)?;
-    let provider =
-        by_id(&provider_id).ok_or_else(|| anyhow!("Unknown provider id '{provider_id}'"))?;
+    let provider = provider_id.provider();
     let provider_cfg = cfg
         .providers
-        .get(&provider_id)
+        .get(provider_id.as_str())
         .ok_or_else(|| anyhow!("Provider '{provider_id}' not configured"))?;
 
     if !per_keys {

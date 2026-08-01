@@ -4,7 +4,7 @@ use anyhow::{Context, Result, bail};
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 
-use crate::providers;
+use crate::providers::ProviderId;
 
 #[derive(Serialize, Deserialize, Default, Debug)]
 #[serde(deny_unknown_fields)]
@@ -35,26 +35,36 @@ impl Config {
             );
         }
         for (id, blob) in &self.providers {
-            providers::validate_provider_blob(id, blob)
+            let provider_id: ProviderId = id
+                .parse()
+                .with_context(|| format!("Invalid config for provider '{id}'"))?;
+            provider_id
+                .validate_blob(blob)
                 .with_context(|| format!("Invalid config for provider '{id}'"))?;
         }
         Ok(())
     }
 
-    pub fn pick_provider_id(&self, explicit: Option<&str>) -> Result<String> {
+    pub fn pick_provider_id(&self, explicit: Option<ProviderId>) -> Result<ProviderId> {
         if let Some(id) = explicit {
-            if self.providers.contains_key(id) {
-                return Ok(id.to_string());
+            if self.providers.contains_key(id.as_str()) {
+                return Ok(id);
             }
             let prog = env::args().next().unwrap_or_else(|| "usus".into());
             bail!("Provider '{id}' is not configured. Run '{prog} {id} login' first.");
         }
-        if !self.default_provider.is_empty() && self.providers.contains_key(&self.default_provider)
+        if !self.default_provider.is_empty()
+            && let Ok(id) = self.default_provider.parse::<ProviderId>()
+            && self.providers.contains_key(id.as_str())
         {
-            return Ok(self.default_provider.clone());
+            return Ok(id);
         }
         if self.providers.len() == 1 {
-            return Ok(self.providers.keys().next().unwrap().clone());
+            let key = self.providers.keys().next().unwrap();
+            let id = key
+                .parse::<ProviderId>()
+                .with_context(|| format!("Provider '{key}' is not a known provider id"))?;
+            return Ok(id);
         }
         let configured: Vec<String> = self.providers.keys().cloned().collect();
         let prog = env::args().next().unwrap_or_else(|| "usus".into());
@@ -335,7 +345,7 @@ typo_field = "oops"
     fn pick_provider_falls_back_to_single_configured() {
         let mut cfg = Config::default();
         cfg.providers.insert("anthropic".to_string(), Value::Null);
-        assert_eq!(cfg.pick_provider_id(None).unwrap(), "anthropic");
+        assert_eq!(cfg.pick_provider_id(None).unwrap(), ProviderId::Anthropic);
     }
 
     #[test]
@@ -345,14 +355,14 @@ typo_field = "oops"
         cfg.providers.insert("anthropic".to_string(), Value::Null);
         cfg.default_provider = "opencode".to_string();
         assert_eq!(
-            cfg.pick_provider_id(Some("anthropic")).unwrap(),
-            "anthropic"
+            cfg.pick_provider_id(Some(ProviderId::Anthropic)).unwrap(),
+            ProviderId::Anthropic
         );
     }
 
     #[test]
-    fn pick_provider_rejects_unknown_explicit() {
+    fn pick_provider_rejects_unconfigured_explicit() {
         let cfg = Config::default();
-        assert!(cfg.pick_provider_id(Some("does-not-exist")).is_err());
+        assert!(cfg.pick_provider_id(Some(ProviderId::Anthropic)).is_err());
     }
 }

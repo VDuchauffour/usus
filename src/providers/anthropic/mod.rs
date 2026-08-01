@@ -6,12 +6,10 @@ use serde_json::Value;
 
 use crate::{
     billing::BillingPeriod,
-    providers::{Provider, ReportView},
+    providers::{Provider, ProviderId, ReportView},
 };
 
 pub mod login;
-
-pub const ID: &str = "anthropic";
 
 const ADMIN_API_BASE: &str = "https://api.anthropic.com/v1/organizations";
 const ANTHROPIC_VERSION: &str = "2023-06-01";
@@ -41,8 +39,8 @@ pub fn validate(blob: &Value) -> Result<()> {
 pub struct Anthropic;
 
 impl Provider for Anthropic {
-    fn id(&self) -> &'static str {
-        ID
+    fn id(&self) -> ProviderId {
+        ProviderId::Anthropic
     }
 
     fn display_name(&self) -> &'static str {
