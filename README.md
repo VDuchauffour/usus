@@ -1,11 +1,26 @@
 # usus
 
-A Rust CLI that reports AI inference usage.
+A CLI that reports AI inference usage against your allowance.
 
 ## Install
 
 ```sh
 cargo install usus
+```
+
+`usus completion` prints a completion script for your current shell (detected from `$SHELL`). Pipe it into the right location for your shell, or pass a shell explicitly:
+
+```sh
+usus completion bash
+usus completion zsh
+usus completion fish
+usus completion # autodetect from $SHELL
+```
+
+For example, with bash:
+
+```sh
+usus completion bash >~/.local/share/bash-completion/completions/usus
 ```
 
 ## Usage
@@ -14,18 +29,12 @@ cargo install usus
 Usage: usus [PROVIDER] [ACTION]
 
 Commands:
-  opencode  Use the OpenCode GO provider
-  anthropic    Use the Anthropic provider (personal rate limits via Claude Code OAuth)
+  opencode    Shows the rolling subscription usage
+  anthropic   Shows your personal rate-limit usage
+  completion  Generate shell completion scripts
 ```
 
 Omit the provider to use the configured default. Omit the action to run `report`.
-
-`usus anthropic` shows your personal rate-limit usage (5-hour and weekly windows)
-using the Claude Code OAuth credentials at `~/.claude/.credentials.json`. No API
-key required — just run `claude login` first.
-
-`usus opencode` shows the rolling subscription usage (5-hour, weekly, and monthly
-windows).
 
 ## Configuration
 
