@@ -1,6 +1,8 @@
 // Provider abstraction. Each provider owns its HTTP, parsing, and aggregation;
 // the orchestrator only consumes ReportView.
 
+use std::{fmt, str::FromStr};
+
 use anyhow::{Result, bail};
 use serde_json::Value;
 
@@ -37,7 +39,7 @@ pub struct RollingUsageView {
 }
 
 pub trait Provider {
-    fn id(&self) -> &'static str;
+    fn id(&self) -> ProviderId;
     fn display_name(&self) -> &'static str;
     fn fetch_report(&self, cfg: &Value, period: &BillingPeriod) -> Result<ReportView>;
     fn login(&self) -> Result<Value>;
@@ -50,23 +52,67 @@ pub trait Provider {
     }
 }
 
-pub fn by_id(id: &str) -> Option<Box<dyn Provider>> {
-    match id {
-        opencode_go::ID => Some(Box::new(opencode_go::OpenCodeGo)),
-        anthropic::ID => Some(Box::new(anthropic::Anthropic)),
-        _ => None,
+/// A known provider identifier — the type-safe replacement for the
+/// `"anthropic"` / `"opencode"` string literals that used to be threaded
+/// through the CLI and config layers.
+#[derive(Clone, Copy, Debug, Eq, PartialEq, Hash)]
+pub enum ProviderId {
+    Anthropic,
+    OpencodeGo,
+}
+
+impl ProviderId {
+    /// All known provider ids, in the order providers are matched against the
+    /// config map. Kept stable for error-message output.
+    pub const ALL: &'static [ProviderId] = &[ProviderId::OpencodeGo, ProviderId::Anthropic];
+
+    /// The string form used as the TOML config key and CLI verb for this
+    /// provider (e.g. `"anthropic"`, `"opencode"`).
+    pub fn as_str(self) -> &'static str {
+        match self {
+            Self::Anthropic => "anthropic",
+            Self::OpencodeGo => "opencode",
+        }
+    }
+
+    /// Instantiate the concrete [`Provider`] implementation for this id.
+    pub fn provider(self) -> Box<dyn Provider> {
+        match self {
+            Self::OpencodeGo => Box::new(opencode_go::OpenCodeGo),
+            Self::Anthropic => Box::new(anthropic::Anthropic),
+        }
+    }
+
+    /// Validate a raw config blob against this provider's expected schema.
+    pub fn validate_blob(self, blob: &Value) -> Result<()> {
+        match self {
+            Self::OpencodeGo => opencode_go::validate(blob),
+            Self::Anthropic => anthropic::validate(blob),
+        }
     }
 }
 
-pub const ALL_IDS: &[&str] = &[opencode_go::ID, anthropic::ID];
+impl fmt::Display for ProviderId {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.write_str(self.as_str())
+    }
+}
 
-pub fn validate_provider_blob(id: &str, blob: &Value) -> Result<()> {
-    match id {
-        opencode_go::ID => opencode_go::validate(blob),
-        anthropic::ID => anthropic::validate(blob),
-        other => bail!(
-            "Unknown provider id '{other}'. Known: {}",
-            ALL_IDS.join(", ")
-        ),
+impl FromStr for ProviderId {
+    type Err = anyhow::Error;
+
+    fn from_str(s: &str) -> Result<Self> {
+        match s {
+            "anthropic" => Ok(Self::Anthropic),
+            "opencode" => Ok(Self::OpencodeGo),
+            other => bail!(
+                "Unknown provider id '{other}'. Known: {}",
+                Self::ALL
+                    .iter()
+                    .map(|p| p.as_str())
+                    .collect::<Vec<_>>()
+                    .join(", ")
+            ),
+        }
     }
 }
