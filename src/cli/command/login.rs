@@ -20,7 +20,7 @@ fn persist_provider(id: ProviderId, provider_blob: Value) -> Result<()> {
     if top.default_provider.is_empty() {
         top.default_provider = id.as_str().to_string();
     }
-    if top.sub_day == 0 {
+    if top.sub_day == 0 && id == ProviderId::OpencodeGo {
         println!();
         println!("What day of the month does your billing cycle start?");
         println!(

@@ -19,8 +19,8 @@ pub struct Config {
 
 impl Config {
     pub fn validate(&self) -> Result<()> {
-        if !(1..=31).contains(&self.sub_day) {
-            bail!("sub_day must be between 1 and 31 (got {})", self.sub_day);
+        if !(0..=31).contains(&self.sub_day) {
+            bail!("sub_day must be between 0 and 31 (got {})", self.sub_day);
         }
         if !self.default_provider.is_empty() && !self.providers.contains_key(&self.default_provider)
         {
@@ -161,8 +161,6 @@ default_provider = "anthropic"
 sub_day = 5
 
 [providers.anthropic]
-admin_key = "sk-ant-admin-x"
-allowance = 200.0
 
 [providers."opencode"]
 auth_cookie = "Fe26.2**x"
@@ -194,10 +192,16 @@ foo = "bar"
 
     #[test]
     fn schema_rejects_sub_day_out_of_range() {
-        let value: Value = toml::from_str("sub_day = 0").unwrap();
+        let value: Value = toml::from_str("sub_day = 32").unwrap();
         let err = validate_against_schema(&value).unwrap_err().to_string();
         assert!(err.contains("schema"), "unexpected error: {err}");
         assert!(err.contains("sub_day"), "unexpected error: {err}");
+    }
+
+    #[test]
+    fn schema_accepts_sub_day_zero() {
+        let value: Value = toml::from_str("sub_day = 0").unwrap();
+        validate_against_schema(&value).unwrap();
     }
 
     #[test]
@@ -214,8 +218,6 @@ auth_cookie = "Fe26.2**x"
     fn schema_rejects_unknown_provider_field() {
         let raw = r#"
 [providers.anthropic]
-admin_key = "sk-ant-admin-x"
-allowance = 200.0
 typo_field = "oops"
 "#;
         let value: Value = toml::from_str(raw).unwrap();
@@ -248,8 +250,6 @@ default_provider = "anthropic"
 sub_day = 5
 
 [providers.anthropic]
-admin_key = "sk-ant-admin-x"
-allowance = 200.0
 
 [providers."opencode"]
 auth_cookie = "x"
@@ -282,15 +282,19 @@ providers = {}
     #[test]
     fn validate_rejects_sub_day_out_of_range() {
         let cfg = Config {
-            sub_day: 0,
-            ..Default::default()
-        };
-        assert!(cfg.validate().is_err());
-        let cfg = Config {
             sub_day: 32,
             ..Default::default()
         };
         assert!(cfg.validate().is_err());
+    }
+
+    #[test]
+    fn validate_accepts_sub_day_zero() {
+        let cfg = Config {
+            sub_day: 0,
+            ..Default::default()
+        };
+        assert!(cfg.validate().is_ok());
     }
 
     #[test]
@@ -333,8 +337,6 @@ auth_cookie = "x"
 sub_day = 5
 
 [providers.anthropic]
-admin_key = "sk-ant-admin-x"
-allowance = 200.0
 typo_field = "oops"
 "#;
         let cfg: Config = toml::from_str(raw).unwrap();

@@ -4,11 +4,11 @@ use std::io;
 
 use anyhow::Result;
 use ratatui::{
-    Terminal, TerminalOptions, Viewport,
     backend::CrosstermBackend,
     style::{Color, Modifier, Style},
     text::{Line, Span},
     widgets::Paragraph,
+    Terminal, TerminalOptions, Viewport,
 };
 
 use crate::providers::{ReportView, RollingUsageView};
@@ -223,14 +223,28 @@ fn format_reset(secs: i64) -> String {
 
 pub fn render_rolling(view: &RollingUsageView) -> Result<()> {
     let hr: String = "─".repeat(PANEL_WIDTH);
+    let renews_str = if view.renews.is_empty() {
+        String::new()
+    } else {
+        format!("Renews {}", view.renews)
+    };
+    let title = view.title.as_str();
+    let h_pad_len = PANEL_WIDTH
+        .saturating_sub(title.chars().count() + renews_str.chars().count())
+        .max(1);
+    let h_pad = " ".repeat(h_pad_len);
     let mut lines: Vec<Line> = vec![
         Line::raw(""),
-        Line::from(vec![Span::styled(
-            format!("  {}", view.title),
-            Style::default()
-                .fg(Color::Cyan)
-                .add_modifier(Modifier::BOLD),
-        )]),
+        Line::from(vec![
+            Span::styled(
+                format!("  {title}"),
+                Style::default()
+                    .fg(Color::Cyan)
+                    .add_modifier(Modifier::BOLD),
+            ),
+            Span::raw(h_pad),
+            Span::styled(renews_str, Style::default().dim()),
+        ]),
         Line::from(vec![Span::styled(
             format!("  {hr}"),
             Style::default().dim(),

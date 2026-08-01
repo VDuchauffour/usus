@@ -12,8 +12,8 @@
     },
     "sub_day": {
       "type": "integer",
-      "description": "Day of the month the billing cycle starts.",
-      "minimum": 1,
+      "description": "Day of the month the billing cycle starts. 0 means unset (not needed for Anthropic rolling usage).",
+      "minimum": 0,
       "maximum": 31
     },
     "providers": {
@@ -23,21 +23,9 @@
       "properties": {
         "anthropic": {
           "type": "object",
-          "description": "Anthropic Admin API provider settings.",
+          "description": "Anthropic provider settings. Reads Claude Code OAuth credentials from ~/.claude/.credentials.json (created by 'claude login'). No config fields required.",
           "additionalProperties": false,
-          "required": ["admin_key"],
-          "properties": {
-            "admin_key": {
-              "type": "string",
-              "description": "Anthropic Admin API key (starts with 'sk-ant-admin01-...')."
-            },
-            "allowance": {
-              "type": "number",
-              "description": "Monthly allowance in USD.",
-              "minimum": 0,
-              "default": 200.0
-            }
-          }
+          "properties": {}
         },
         "opencode": {
           "type": "object",

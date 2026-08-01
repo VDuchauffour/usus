@@ -1,6 +1,6 @@
 // Report command - thin orchestrator. Provider does the work.
 
-use anyhow::{Result, anyhow};
+use anyhow::{anyhow, bail, Result};
 
 use crate::cli::render::get_spinner;
 use crate::{
@@ -29,6 +29,12 @@ pub fn run(provider_flag: Option<ProviderId>, per_keys: bool) -> Result<()> {
         }
     }
 
+    if cfg.sub_day == 0 {
+        bail!(
+            "Billing cycle day (sub_day) is not configured. \
+             Run 'usus opencode login' to set it."
+        );
+    }
     let period = BillingPeriod::current(cfg.sub_day);
     let spinner = get_spinner("Fetching usage data...");
     let result = provider.fetch_report(provider_cfg, &period);

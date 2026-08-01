@@ -36,6 +36,7 @@ pub struct UsageWindowView {
 pub struct RollingUsageView {
     pub title: String,
     pub windows: Vec<UsageWindowView>,
+    pub renews: String,
 }
 
 pub trait Provider {
