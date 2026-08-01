@@ -5,8 +5,10 @@ A CLI that reports AI inference usage against your allowance.
 ## Install
 
 ```sh
-cargo install usus
+curl -fsSL https://raw.githubusercontent.com/VDuchauffour/usus/main/install.sh | bash
 ```
+
+or `cargo install usus` · [binaries](https://github.com/VDuchauffour/usus/releases)
 
 `usus completion` prints a completion script for your current shell (detected from `$SHELL`). Pipe it into the right location for your shell, or pass a shell explicitly:
 
