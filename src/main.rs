@@ -1,7 +1,9 @@
 use anyhow::Result;
 use clap::Parser;
 use console::style;
-use usus::cli::command::{AnthropicAction, Cli, Command, OpencodeGoAction, login, report};
+use usus::cli::command::{
+    AnthropicAction, Cli, Command, OpencodeGoAction, completion, login, report,
+};
 use usus::providers::ProviderId;
 
 pub fn run(cli: Cli) -> Result<()> {
@@ -14,6 +16,7 @@ pub fn run(cli: Cli) -> Result<()> {
             Some(AnthropicAction::Login) => login::run(ProviderId::Anthropic),
             Some(AnthropicAction::Report) | None => report::run(Some(ProviderId::Anthropic)),
         },
+        Some(Command::Completion { shell }) => completion::run(shell),
         None => report::run(None),
     }
 }

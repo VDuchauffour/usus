@@ -1,5 +1,7 @@
 use clap::{Parser, Subcommand};
+use clap_complete::Shell;
 
+pub mod completion;
 pub mod login;
 pub mod report;
 use clap::builder::{
@@ -39,6 +41,12 @@ pub enum Command {
     Anthropic {
         #[command(subcommand)]
         action: Option<AnthropicAction>,
+    },
+    /// Generate shell completion scripts (defaults to $SHELL)
+    Completion {
+        /// Shell to generate completions for (bash, zsh, fish, elvish, powershell)
+        #[arg(value_enum)]
+        shell: Option<Shell>,
     },
 }
 
