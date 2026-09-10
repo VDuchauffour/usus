@@ -39,6 +39,10 @@ fmt:
 fmt-check:
     cargo +nightly fmt --check
 
+udeps:
+    command -v cargo-udeps >/dev/null 2>&1 || cargo install cargo-udeps --locked
+    cargo +nightly udeps --all-targets --all-features --locked
+
 check:
     cargo check
 
