@@ -32,6 +32,10 @@ jobs:
         run: |
           just fmt-check
           just lint-strict
+      - name: Install cargo-udeps
+        uses: taiki-e/install-action@cargo-udeps
+      - name: Udeps
+        run: cargo +nightly udeps --all-targets --all-features --locked
 
   coverage:
     runs-on: ubuntu-latest

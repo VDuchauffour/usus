@@ -88,6 +88,7 @@ just check              # cargo check
 just fmt                # cargo +nightly fmt            (writes; nightly REQUIRED)
 just fmt-check          # cargo +nightly fmt --check
 just lint-strict        # cargo clippy --all-targets --all-features --locked -- -D warnings
+just udeps              # cargo +nightly udeps --all-targets --all-features --locked (nightly REQUIRED)
 just ci                 # fmt-check + lint-strict + test  (read-only pre-merge gate)
 just ci-fix             # fmt + lint-strict-fix + test    (auto-fixing; mutates working tree)
 just build              # cargo build
@@ -98,7 +99,7 @@ just pre-commit-install # installs pre-commit + pre-push hooks (requires `uv` fo
 
 ## NOTES
 
-- **CI does NOT run `just test`.** GitHub Actions `ci.yml` runs only `just fmt-check` + `just lint-strict`. Tests run in CI only via the separate `coverage` job (`cargo tarpaulin`). `just ci` (local) is the stricter gate.
+- **CI does NOT run `just test`.** GitHub Actions `ci.yml` runs only `just fmt-check` + `just lint-strict` + `cargo +nightly udeps` (unused-dependency check). Tests run in CI only via the separate `coverage` job (`cargo tarpaulin`). `just ci` (local) is the stricter gate.
 - **Pre-commit hooks are mandatory** (README:51): `just check` on commit, `just ci-fix` on pre-push (auto-fixes fmt+clippy then runs tests). Requires `uv` installed (`uvx pre-commit`). `just ci-fix` uses `--allow-dirty` and mutates your working tree during the hook.
 - **`just bump` requires `cargo-bump`** — NOT provisioned in the devcontainer. `cargo install cargo-bump` first.
 - **PR titles MUST be Conventional Commits** and the subject MUST NOT start with an uppercase letter (`subjectPattern: ^(?![A-Z]).+$`, `validateSingleCommit: true`). Enforced via `amannn/action-semantic-pull-request@v6`.

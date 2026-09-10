@@ -16,8 +16,8 @@ if ! command -v cargo-binstall >/dev/null 2>&1; then
 		https://raw.githubusercontent.com/cargo-bins/cargo-binstall/main/install-from-binstall-release.sh | bash
 fi
 
-echo "==> Installing dev tools (just, cargo-tarpaulin)"
-cargo binstall -y just cargo-tarpaulin
+echo "==> Installing dev tools (just, cargo-tarpaulin, cargo-udeps)"
+cargo binstall -y just cargo-tarpaulin cargo-udeps
 
 echo "==> Installing pre-commit"
 if command -v pipx >/dev/null 2>&1; then
