@@ -19,7 +19,7 @@ pub fn run() -> Result<serde_json::Value> {
     if !path.exists() {
         bail!(
             "Credentials not found at {}.\n\
-             Run `claude login` first, then re-run `usus anthropic login`.",
+             Run `claude login` first, then re-run `usus claude login`.",
             path.display()
         );
     }

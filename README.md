@@ -32,7 +32,7 @@ Usage: usus [PROVIDER] [ACTION]
 
 Commands:
   opencode    Shows the rolling subscription usage
-  anthropic   Shows your personal rate-limit usage
+  claude      Shows your personal rate-limit usage
   completion  Generate shell completion scripts
 ```
 
