@@ -1,6 +1,13 @@
 # usus
 
+[![CI](https://github.com/VDuchauffour/usus/actions/workflows/ci.yml/badge.svg)](https://github.com/VDuchauffour/usus/actions/workflows/ci.yml)
+[![codecov](https://codecov.io/gh/VDuchauffour/usus/graph/badge.svg)](https://codecov.io/gh/VDuchauffour/usus)
+[![Crates.io](https://img.shields.io/crates/v/usus.svg)](https://crates.io/crates/usus)
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+
 A CLI that reports AI inference usage against your allowance.
+
+![usus claude](assets/screenshot.png)
 
 ## Install
 
