@@ -9,7 +9,7 @@ default_provider = "anthropic"
 
 [providers."opencode"]
 auth_cookie = "Fe26.2**..."
-workspace_id = "wrk_01KDSXX2YK0SSF30AKBTQGWQM9"
+workspace_id = "wrk_01..."
 server_id = "15702f3a12ff8bff..."
 function_id = 31
 ```
@@ -47,7 +47,7 @@ No fields needed. Reads Claude Code OAuth credentials from `~/.claude/.credentia
 ```toml
 [providers."opencode"]
 auth_cookie = "Fe26.2**..."
-workspace_id = "wrk_01KDSXX2YK0SSF30AKBTQGWQM9"
+workspace_id = "wrk_01..."
 server_id = "15702f3a12ff8bff..."
 function_id = 31
 ```
