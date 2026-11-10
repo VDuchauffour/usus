@@ -7,7 +7,7 @@
 
 A CLI that reports AI inference usage against your allowance.
 
-![usus claude](assets/screenshot.png)
+![usus claude demo](assets/demo.gif)
 
 ## Install
 
