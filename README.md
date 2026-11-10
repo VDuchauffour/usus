@@ -25,19 +25,27 @@ usus completion bash >~/.local/share/bash-completion/completions/usus
 ## Usage
 
 ```text
-Usage: usus [PROVIDER] [ACTION]
+Usage: usus [COMMAND]
 
 Commands:
   opencode    Use the OpenCode GO provider
   claude      Use the Claude Code (Anthropic) provider
-  completion  Generate shell completion scripts
+  completion  Generate shell completion scripts (defaults to $SHELL)
 ```
 
-Both the provider and the action are optional:
+Running `usus` with no command reports usage for the configured default provider.
 
-- `usus opencode` / `usus claude` — report usage (default action)
-- `usus opencode login` / `usus claude login` — configure the provider
-- `usus` — report via the configured default provider
+Each provider takes an optional action (defaults to `report`):
+
+| Command                   | Description                                                     |
+| ------------------------- | --------------------------------------------------------------- |
+| `usus opencode`           | Report OpenCode GO usage                                        |
+| `usus opencode report`    | Report OpenCode GO usage                                        |
+| `usus opencode login`     | Configure the OpenCode GO provider                              |
+| `usus claude`             | Report Claude Code usage                                        |
+| `usus claude report`      | Report Claude Code usage                                        |
+| `usus claude login`       | Configure the Claude Code provider                              |
+| `usus completion [SHELL]` | Print a completion script (bash, zsh, fish, elvish, powershell) |
 
 See [Configuration](docs/configuration.md) for setup and provider options.
 
