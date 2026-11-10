@@ -1,6 +1,13 @@
 # usus
 
+[![CI](https://github.com/VDuchauffour/usus/actions/workflows/ci.yml/badge.svg)](https://github.com/VDuchauffour/usus/actions/workflows/ci.yml)
+[![codecov](https://codecov.io/gh/VDuchauffour/usus/graph/badge.svg)](https://codecov.io/gh/VDuchauffour/usus)
+[![Crates.io](https://img.shields.io/crates/v/usus.svg)](https://crates.io/crates/usus)
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+
 A CLI that reports AI inference usage against your allowance.
+
+![usus claude demo](assets/demo.gif)
 
 ## Install
 
@@ -8,18 +15,15 @@ A CLI that reports AI inference usage against your allowance.
 curl -fsSL https://raw.githubusercontent.com/VDuchauffour/usus/main/install.sh | bash
 ```
 
-or `cargo install usus` · [binaries](https://github.com/VDuchauffour/usus/releases)
-
-`usus completion` prints a completion script for your current shell (detected from `$SHELL`). Pipe it into the right location for your shell, or pass a shell explicitly:
+or
 
 ```sh
-usus completion bash
-usus completion zsh
-usus completion fish
-usus completion # autodetect from $SHELL
+cargo install usus
 ```
 
-For example, with bash:
+or grab a [prebuilt binary](https://github.com/VDuchauffour/usus/releases).
+
+Shell completions:
 
 ```sh
 usus completion bash >~/.local/share/bash-completion/completions/usus
@@ -28,34 +32,29 @@ usus completion bash >~/.local/share/bash-completion/completions/usus
 ## Usage
 
 ```text
-Usage: usus [PROVIDER] [ACTION]
+Usage: usus [COMMAND]
 
 Commands:
-  opencode    Shows the rolling subscription usage
-  claude      Shows your personal rate-limit usage
-  completion  Generate shell completion scripts
+  opencode    Use the OpenCode GO provider
+  claude      Use the Claude Code (Anthropic) provider
+  completion  Generate shell completion scripts (defaults to $SHELL)
 ```
 
-Omit the provider to use the configured default. Omit the action to run `report`.
+Running `usus` with no command reports usage for the configured default provider.
 
-## Configuration
+Each provider takes an optional action (defaults to `report`):
 
-Config lives at `~/.config/usus/config.toml`. Example:
+| Command                   | Description                                                     |
+| ------------------------- | --------------------------------------------------------------- |
+| `usus opencode`           | Report OpenCode GO usage                                        |
+| `usus opencode report`    | Report OpenCode GO usage                                        |
+| `usus opencode login`     | Configure the OpenCode GO provider                              |
+| `usus claude`             | Report Claude Code usage                                        |
+| `usus claude report`      | Report Claude Code usage                                        |
+| `usus claude login`       | Configure the Claude Code provider                              |
+| `usus completion [SHELL]` | Print a completion script (bash, zsh, fish, elvish, powershell) |
 
-```toml
-default_provider = "anthropic"
-
-[providers.anthropic]
-
-[providers."opencode"]
-auth_cookie = "Fe26.2**..."
-workspace_id = "wrk_01KDSXX2YK0SSF30AKBTQGWQM9"
-server_id = "15702f3a12ff8bff..."
-function_id = 31
-```
-
-- `default_provider` — the provider used when no provider is given on the command line
-- `[providers.anthropic]` — no fields needed; reads Claude Code OAuth credentials from `~/.claude/.credentials.json` (created by `claude login`)
+See [Configuration](docs/configuration.md) for setup and provider options.
 
 ## Development
 
