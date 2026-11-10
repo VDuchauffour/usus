@@ -84,7 +84,7 @@ fn read_oauth_token() -> Result<String> {
     if !path.exists() {
         bail!(
             "Claude Code credentials not found at {}.\n\
-             Run 'claude login' first, then run 'usus anthropic login'.",
+             Run 'claude login' first, then run 'usus claude login'.",
             path.display()
         );
     }

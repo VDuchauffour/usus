@@ -37,7 +37,8 @@ pub enum Command {
         #[command(subcommand)]
         action: Option<OpencodeGoAction>,
     },
-    /// Use the Anthropic Admin API provider
+    /// Use the Claude Code (Anthropic) provider
+    #[command(name = "claude")]
     Anthropic {
         #[command(subcommand)]
         action: Option<AnthropicAction>,
