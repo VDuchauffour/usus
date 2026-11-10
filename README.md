@@ -40,19 +40,14 @@ Commands:
   completion  Generate shell completion scripts (defaults to $SHELL)
 ```
 
-Running `usus` with no command reports usage for the configured default provider.
+Example:
 
-Each provider takes an optional action (defaults to `report`):
-
-| Command                   | Description                                                     |
-| ------------------------- | --------------------------------------------------------------- |
-| `usus opencode`           | Report OpenCode GO usage                                        |
-| `usus opencode report`    | Report OpenCode GO usage                                        |
-| `usus opencode login`     | Configure the OpenCode GO provider                              |
-| `usus claude`             | Report Claude Code usage                                        |
-| `usus claude report`      | Report Claude Code usage                                        |
-| `usus claude login`       | Configure the Claude Code provider                              |
-| `usus completion [SHELL]` | Print a completion script (bash, zsh, fish, elvish, powershell) |
+| Command              | Description                                            |
+| -------------------- | ------------------------------------------------------ |
+| `usus`               | Uses the configured default provider and runs `report` |
+| `usus claude`        | Runs `report` for `claude` (the default subcommand)    |
+| `usus claude report` | Shows your personal rate-limit usage                   |
+| `usus claude login`  | Configure this provider                                |
 
 See [Configuration](docs/configuration.md) for setup and provider options.
 
